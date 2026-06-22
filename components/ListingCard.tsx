@@ -13,6 +13,8 @@ interface Business {
   city?: string | null
   state?: string | null
   description?: string | null
+  listing_type?: 'repairs' | 'mowing' | null
+
 }
 
 interface ListingCardProps {
@@ -29,6 +31,16 @@ export default function ListingCard({
   const ratingNumber = business.rating ? parseFloat(business.rating) : 0
   const fullStars = Math.floor(ratingNumber)
   const hasHalfStar = ratingNumber % 1 >= 0.5
+  const getListingLabel = (type?: 'repairs' | 'mowing' | null) => {
+    switch (type) {
+      case 'repairs':
+        return 'Repair Shop'
+      case 'mowing':
+        return 'Lawn Care'
+      default:
+        return 'Service'
+    }
+  }
 
   if (variant === 'compact') {
     return (
@@ -36,6 +48,14 @@ export default function ListingCard({
         <div className="bg-white rounded-lg p-4 hover:shadow-md transition cursor-pointer border border-gray-100">
           <div className="flex justify-between items-start">
             <div>
+              <span className={`
+                  inline-block text-xs font-semibold px-2 py-1 rounded-full
+                  ${business.listing_type === 'repairs'
+                    ? 'bg-orange-100 text-orange-700'
+                    : 'bg-green-100 text-green-700'}
+                `}>
+                  {getListingLabel(business.listing_type)}
+                </span>
               <h3 className="font-semibold text-lg text-gray-800 hover:text-green-600">
                 {business.name}
               </h3>
