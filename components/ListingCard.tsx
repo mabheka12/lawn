@@ -56,6 +56,12 @@ export default function ListingCard({
                 `}>
                   {getListingLabel(business.listing_type)}
                 </span>
+                <span className={business.listing_type === 'mowing'
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-blue-100 text-blue-700'
+                  }>
+                    {business.listing_type}
+                </span>
               <h3 className="font-semibold text-lg text-gray-800 hover:text-green-600">
                 {business.name}
               </h3>

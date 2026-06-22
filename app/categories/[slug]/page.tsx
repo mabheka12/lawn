@@ -200,6 +200,22 @@ export default async function CategoryPage({
               />
             </div>
 
+            <div className="flex gap-3 mb-6">
+              <Link
+                href={`/type/mowing`}
+                className="px-4 py-2 bg-green-100 text-green-700 rounded"
+              >
+                Mowing
+              </Link>
+
+              <Link
+                href={`/type/repairs`}
+                className="px-4 py-2 bg-blue-100 text-blue-700 rounded"
+              >
+                Repairs
+              </Link>
+            </div>
+
             {/* Listings */}
             <div className="lg:w-3/4">
               <div className="mb-4 flex flex-wrap justify-between items-center gap-2">
