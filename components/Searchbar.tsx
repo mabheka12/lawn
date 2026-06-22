@@ -95,22 +95,22 @@ export default function SearchBar({
 
           {/* Advanced Filters */}
           {showFilters && (
-            <div className="p-4 border-t bg-gray-50 grid grid-cols-1 md:grid-cols-3 gap-4">
-              <select className="p-2 border rounded-lg">
+            <div className="p-4 border-t bg-green-600 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <select className="p-2 border rounded-lg bg-gray-500 text-white">
                 <option value="">All Categories</option>
                 <option value="repair">Repair</option>
                 <option value="maintenance">Maintenance</option>
                 <option value="sales">Sales</option>
                 <option value="sharpening">Sharpening</option>
               </select>
-              <select className="p-2 border rounded-lg">
+              <select className="p-2 border rounded-lg bg-gray-500 text-white">
                 <option value="">Radius</option>
                 <option value="5">Within 5 miles</option>
                 <option value="10">Within 10 miles</option>
                 <option value="25">Within 25 miles</option>
                 <option value="50">Within 50 miles</option>
               </select>
-              <select className="p-2 border rounded-lg">
+              <select className="p-2 border rounded-lg bg-gray-500 text-white">
                 <option value="">Rating</option>
                 <option value="4">4+ stars</option>
                 <option value="3">3+ stars</option>
