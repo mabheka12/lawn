@@ -178,7 +178,9 @@ export default function Navbar() {
             </div>
             
             <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
-              List Your Business
+               <Link href="/add-listing" className="text-gray-700 hover:text-green-600 transition">
+                List Your Business
+              </Link>
             </button>
           </div>
 

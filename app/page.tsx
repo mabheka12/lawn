@@ -199,7 +199,9 @@ export default async function HomePage() {
             </p>
 
             <button className="bg-white text-green-700 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
-              List Your Business
+                <Link href="/add-listing" className="text-gray-700 hover:text-green-600 transition">
+                  List Your Business
+                </Link>
             </button>
 
           </div>
