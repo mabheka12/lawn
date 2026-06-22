@@ -87,20 +87,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }))
   
   // Service + city combinations - Use ALL cities or limit to reasonable number
-  const services = [
-    'grass-cutting-service', 'lawn-fertilization', 'landscape-architect', 
-    'irrigation-installation', 'lawn-maintenance', 'landscaping', 
-    'garden-care', 'hedge-trimming', 'lawn-mowing-service', 
-    'lawn-care', 'lawn-treatment', 'mulching-services', 
-    'tree-service-landscaping', 'yard-care-service'
-  ]
-  
   // Use ALL cities for service pages (but be careful with total count)
   // Max recommended URLs per sitemap is 50,000. With 200 cities × 16 services = 3,200 URLs (safe)
-  const allCities = uniqueCities // Use all cities, not just top 20
-  const serviceCityRoutes = allCities.flatMap(({ city }) =>
-    services.map((service) => ({
-      url: `${baseUrl}/services/${service}/${encodeURIComponent(city.toLowerCase().replace(/ /g, '-'))}`,
+  const serviceCityRoutes =
+  uniqueCities.flatMap(({ city }) =>
+    (categories || []).map(category => ({
+      url: `${baseUrl}/services/${category.slug}/${encodeURIComponent(
+        city.toLowerCase().replace(/ /g, '-')
+      )}`,
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.5,
