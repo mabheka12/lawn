@@ -105,10 +105,10 @@ export default function NearMeIndexPage() {
 
   return (
     <>
-      <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20">
+      <section className="bg-gradient-to-r from-green-600 to-green-800 text-white py-20">
         <div className="container mx-auto px-4 text-center">
           <MapPin size={56} className="mx-auto mb-4" />
-          <h1 className="text-5xl font-bold mb-4">Find Lawn Mower Services Near You</h1>
+          <h1 className="text-5xl font-bold mb-4">Lawn Mower Services Near Me</h1>
           <p className="text-xl mb-8 max-w-2xl mx-auto">
             Discover trusted lawn mower repair, maintenance, and sales professionals in your local area
           </p>
