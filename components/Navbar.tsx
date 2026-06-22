@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { Menu, X, Search, User, Globe, ChevronDown } from 'lucide-react'
+import { Menu, X, Search, User, Globe, ChevronDown, CirclePlus } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client' 
 import Image from 'next/image'
 
@@ -224,8 +224,8 @@ export default function Navbar() {
               <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             </div>
             
-            <Link href="/login" className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition inline-block">
-              Login
+            <Link href="/add-listing" className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition inline-block">
+             <CirclePlus size={18} className="inline-block ml-1" /> Add Listing 
             </Link>
           </div>
         </div>
