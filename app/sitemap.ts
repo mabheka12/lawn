@@ -5,106 +5,151 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = await createClient()
   const baseUrl = 'https://www.lawnmowingnearme.org'
 
-  // -------------------------
-  // BUSINESSES
-  // -------------------------
-  const { data: businesses } = await supabase
-    .from('businesses')
-    .select('slug, updated_at, created_at')
-    .not('slug', 'is', null)
+  // ----------------------------------------
+  // 1. STATIC PAGES (always index)
+  // ----------------------------------------
+  const staticRoutes = [
+    '/',
+    '/categories',
+    '/near-me',
+    '/about',
+    '/contact'
+  ].map(path => ({
+    url: `${baseUrl}${path}`,
+    lastModified: new Date(),
+    changeFrequency: 'daily' as const,
+    priority: 1
+  }))
+
+  // ----------------------------------------
+  // 2. BUSINESSES (all indexable)
+  // ----------------------------------------
+async function fetchAllBusinesses(supabase: any) {
+  const pageSize = 1000
+  let from = 0
+  let all: any[] = []
+
+  while (true) {
+    const { data, error } = await supabase
+      .from('businesses')
+      .select('slug, created_at, name')
+      .range(from, from + pageSize - 1)
+
+    if (error) {
+      console.error(error)
+      break
+    }
+
+    if (!data || data.length === 0) break
+
+    all = all.concat(data)
+
+    if (data.length < pageSize) break
+
+    from += pageSize
+  }
+
+  return all
+}
+
+  const businesses = await fetchAllBusinesses(supabase)
 
   const businessRoutes =
-    businesses?.map((b) => ({
+    (businesses || []).map(b => ({
       url: `${baseUrl}/listings/${b.slug}`,
-      lastModified: new Date(b.updated_at || b.created_at),
+      lastModified: new Date(b.created_at),
       changeFrequency: 'weekly' as const,
-      priority: 0.7,
-    })) || []
+      priority: 0.7
+    }))
 
-  // -------------------------
-  // CITIES
-  // -------------------------
+  // ----------------------------------------
+  // 3. CATEGORIES
+  // ----------------------------------------
+  const { data: categories } = await supabase
+    .from('categories')
+    .select('slug, name')
+
+  const categoryRoutes =
+    (categories || []).map(c => ({
+      url: `${baseUrl}/categories/${c.slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.9
+    }))
+
+  // ----------------------------------------
+  // 4. CITIES (FILTERED = IMPORTANT FIX)
+  // Only cities with 3+ businesses
+  // ----------------------------------------
   const { data: cityData } = await supabase
     .from('businesses')
     .select('city, city_slug')
-    .not('city', 'is', null)
-    .not('city_slug', 'is', null)
 
-  const uniqueCities = [
-    ...new Map(
-      (cityData || []).map((c) => [c.city_slug, c])
-    ).values(),
-  ]
+  const cityCountMap = new Map<string, number>()
 
-  const cityRoutes = uniqueCities.map((c) => ({
-    url: `${baseUrl}/near-me/${c.city_slug}`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly' as const,
-    priority: 0.6,
-  }))
+  cityData?.forEach(b => {
+    if (!b.city_slug) return
+    cityCountMap.set(
+      b.city_slug,
+      (cityCountMap.get(b.city_slug) || 0) + 1
+    )
+  })
 
-  // -------------------------
-  // SERVICES (ONLY 2 TYPES)
-  // -------------------------
-  const services = ['mowing', 'repairs']
-
-  const serviceCityRoutes = uniqueCities.flatMap((city) =>
-    services.map((service) => ({
-      url: `${baseUrl}/services/${service}/${city.city_slug}`,
+  const cityRoutes = Array.from(cityCountMap.entries())
+    .filter(([_, count]) => count >= 3)
+    .map(([citySlug]) => ({
+      url: `${baseUrl}/near-me/${citySlug}`,
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
-      priority: 0.5,
+      priority: 0.7
     }))
-  )
 
-  // -------------------------
-  // STATIC ROUTES
-  // -------------------------
-  const staticRoutes = [
-    {
-      url: baseUrl,
-      lastModified: new Date(),
-      changeFrequency: 'daily' as const,
-      priority: 1.0,
-    },
-    {
-      url: `${baseUrl}/categories`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/near-me`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/about`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly' as const,
-      priority: 0.4,
-    },
-    {
-      url: `${baseUrl}/contact`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly' as const,
-      priority: 0.4,
-    },
-  ]
+  // ----------------------------------------
+  // 5. CATEGORY × CITY (CONTROLLED SCALE)
+  // Only include combinations with 2+ businesses
+  // ----------------------------------------
+  const { data: comboData } = await supabase
+    .from('businesses')
+    .select('primary_category, city_slug')
 
+  const comboMap = new Map<string, number>()
+
+  comboData?.forEach(b => {
+    if (!b.primary_category || !b.city_slug) return
+
+    const key = `${b.primary_category}__${b.city_slug}`
+    comboMap.set(key, (comboMap.get(key) || 0) + 1)
+  })
+
+  const categoryCityRoutes = Array.from(comboMap.entries())
+    .filter(([_, count]) => count >= 2)
+    .map(([key]) => {
+      const [category, city] = key.split('__')
+
+      return {
+        url: `${baseUrl}/categories/${category}/${city}`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.6
+      }
+    })
+
+  // ----------------------------------------
+  // FINAL OUTPUT
+  // ----------------------------------------
   const allRoutes = [
     ...staticRoutes,
     ...businessRoutes,
+    ...categoryRoutes,
     ...cityRoutes,
-    ...serviceCityRoutes,
+    ...categoryCityRoutes
   ]
 
-  console.log(`✅ Sitemap built:`)
-  console.log(`- Businesses: ${businessRoutes.length}`)
-  console.log(`- Cities: ${cityRoutes.length}`)
-  console.log(`- Service pages: ${serviceCityRoutes.length}`)
-  console.log(`TOTAL: ${allRoutes.length}`)
+  console.log('✅ Sitemap built:')
+  console.log('- Businesses:', businessRoutes.length)
+  console.log('- Cities:', cityRoutes.length)
+  console.log('- Category×City:', categoryCityRoutes.length)
+  console.log('TOTAL:', allRoutes.length)
 
   return allRoutes
 }

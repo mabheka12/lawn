@@ -110,7 +110,7 @@ export default async function CategoriesPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <div className="font-bold text-3xl text-green-600">
-                {totalBusinesses.toLocaleString()}
+                {totalBusinesses.toLocaleString()}+
               </div>
 
               <div className="text-gray-600">
