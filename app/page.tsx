@@ -51,7 +51,7 @@ export default async function HomePage() {
         <section className="bg-gradient-to-r from-green-600 to-green-800 text-white py-20">
           <div className="container mx-auto px-4">
             <h1 className="text-5xl font-bold mb-4 text-center">
-              Find Lawn Care & Repair Services Near Me
+             Find Lawn Mowing & Lawn Mower Repair Services Near Me
             </h1>
 
             <p className="text-xl mb-8 text-center max-w-3xl mx-auto">

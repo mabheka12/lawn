@@ -6,22 +6,23 @@ import Script from "next/script";
 
 const inter = Inter({ subsets: ['latin'] })
 
+
 export const metadata: Metadata = {
-  title: 'Lawn Mower Directory - Find Lawn Mower Services Near You',
-  description: 'Connect with trusted lawn mower repair, maintenance, and sales professionals in your area. Read reviews, compare prices, and find the best lawn mower services.',
-  keywords: 'lawn mower repair, lawn mower maintenance, lawn mower sales, landscaping services, blade sharpening',
+  title: 'Lawn Care & Mower Repair Near Me | Find Local Services',
+  description: 'Find trusted lawn care, lawn mowing, and lawn mower repair services near you. Compare ratings, read reviews, and connect with local specialists.',
+  keywords: 'lawn care near me, lawn mower repair near me, lawn mowing service near me, lawn maintenance near me, lawnmower repair',
   authors: [{ name: 'LawnMowerDir' }],
   openGraph: {
-    title: 'Lawn Mower Directory',
+    title: 'Lawn Mowing Near Me',
     description: 'Find the best lawn mower services near you',
     url: 'https://www.lawnmowingnearme.org',
-    siteName: 'Lawn Mower Directory',
+    siteName: 'Lawn Mowing Near Me',
     images: [
       {
         url: '/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'Lawn Mower Directory',
+        alt: 'Lawn Mowing Near Me',
       },
     ],
     locale: 'en_US',
@@ -29,7 +30,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Lawn Mower Directory',
+    title: 'Lawn Mowing Near Me',
     description: 'Find the best lawn mower services near you',
     images: ['/twitter-image.jpg'],
   },
