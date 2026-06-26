@@ -68,6 +68,20 @@ export default function RootLayout({
             gtag('config', 'G-HS88FYGGK6');
           `}
         </Script>
+        <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{__html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "name": "Lawn Mowing Near Me",
+              "url": "https://lawnmowingnearme.org",
+              "potentialAction": {
+                "@type": "SearchAction",
+                "target": "https://lawnmowingnearme.org/services?q={search_term_string}",
+                "query-input": "required name=search_term_string"
+              }
+            })}}
+          />
    
       </head>
       <body className={inter.className}>     

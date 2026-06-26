@@ -55,6 +55,12 @@ export default async function HomePage() {
             </h1>
 
             <p className="text-xl mb-8 text-center max-w-3xl mx-auto">
+              Search local lawn mowing services, lawn care companies, 
+              lawnmower repair shops, and blade sharpening specialists 
+              across the US and Australia.
+            </p>
+
+            <p className="text-xl mb-8 text-center max-w-3xl mx-auto">
               Discover trusted lawn care companies, landscaping experts,
               lawn mower repair shops, and outdoor power equipment specialists.
             </p>
