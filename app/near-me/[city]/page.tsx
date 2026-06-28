@@ -50,7 +50,7 @@ export default async function NearMePage({ params, searchParams }: PageProps) {
   let query = supabase
     .from('businesses')
     .select('*')
-    .eq('city', city)
+    .eq('city_slug', citySlug)
   
   // Apply category filter
   if (selectedCategory && selectedCategory !== 'all') {

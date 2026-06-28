@@ -77,6 +77,13 @@ async function fetchAllBusinesses(supabase: any) {
       priority: 0.9
     }))
 
+  const slugLookup = new Map<string, string>()
+  ;(categories || []).forEach(c => {
+    if (c.name && c.slug) {
+      slugLookup.set(c.name, c.slug)
+    }
+  })
+
   // ----------------------------------------
   // 4. CITIES (FILTERED = IMPORTANT FIX)
   // Only cities with 3+ businesses
@@ -124,15 +131,24 @@ async function fetchAllBusinesses(supabase: any) {
   const categoryCityRoutes = Array.from(comboMap.entries())
     .filter(([_, count]) => count >= 2)
     .map(([key]) => {
-      const [category, city] = key.split('__')
+      const [categoryName, citySlug] = key.split('__')
+      const categorySlug = slugLookup.get(categoryName)
+
+      if (!categorySlug) return null
 
       return {
-        url: `${baseUrl}/categories/${category}/${city}`,
+        url: `${baseUrl}/categories/${categorySlug}/${citySlug}`,
         lastModified: new Date(),
-        changeFrequency: 'weekly' as const,
-        priority: 0.6
+        priority: 0.6,
+        changeFrequency: 'weekly' as const
       }
     })
+    .filter((route): route is {
+      url: string
+      lastModified: Date
+      priority: number
+      changeFrequency: 'weekly'
+    } => Boolean(route))
 
   // ----------------------------------------
   // FINAL OUTPUT
