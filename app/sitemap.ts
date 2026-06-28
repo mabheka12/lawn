@@ -145,11 +145,5 @@ async function fetchAllBusinesses(supabase: any) {
     ...categoryCityRoutes
   ]
 
-  console.log('✅ Sitemap built:')
-  console.log('- Businesses:', businessRoutes.length)
-  console.log('- Cities:', cityRoutes.length)
-  console.log('- Category×City:', categoryCityRoutes.length)
-  console.log('TOTAL:', allRoutes.length)
-
   return allRoutes
 }
