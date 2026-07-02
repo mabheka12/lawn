@@ -9,48 +9,51 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 1. STATIC PAGES (always index)
   // ----------------------------------------
   const staticRoutes = [
-    '/',
-    '/categories',
-    '/near-me',
-    '/about',
-    '/contact'
-  ].map(path => ({
+    { path: '/', priority: 1 },
+    { path: '/categories', priority: 0.9 },
+    { path: '/near-me', priority: 0.9 },
+    { path: '/lawn-care', priority: 0.9 },
+    { path: '/mower-repair', priority: 0.9 },
+    { path: '/locations', priority: 0.9 },
+    { path: '/about', priority: 0.5 },
+    { path: '/contact', priority: 0.5 },
+  ].map(({ path, priority }) => ({
     url: `${baseUrl}${path}`,
     lastModified: new Date(),
-    changeFrequency: 'daily' as const,
-    priority: 1
+    changeFrequency: 'weekly' as const,
+    priority
   }))
 
   // ----------------------------------------
   // 2. BUSINESSES (all indexable)
   // ----------------------------------------
-async function fetchAllBusinesses(supabase: any) {
-  const pageSize = 1000
-  let from = 0
-  let all: any[] = []
+  async function fetchAllBusinesses(supabase: any) {
+    const pageSize = 1000
+    let from = 0
+    let all: any[] = []
 
-  while (true) {
-    const { data, error } = await supabase
-      .from('businesses')
-      .select('slug, created_at, name')
-      .range(from, from + pageSize - 1)
+    while (true) {
+      const { data, error } = await supabase
+        .from('businesses')
+        .select('slug, created_at, name')
+        .range(from, from + pageSize - 1)
 
-    if (error) {
-      console.error(error)
-      break
+      if (error) {
+        console.error(error)
+        break
+      }
+
+      if (!data || data.length === 0) break
+
+      all = all.concat(data)
+
+      if (data.length < pageSize) break
+
+      from += pageSize
     }
 
-    if (!data || data.length === 0) break
-
-    all = all.concat(data)
-
-    if (data.length < pageSize) break
-
-    from += pageSize
+    return all
   }
-
-  return all
-}
 
   const businesses = await fetchAllBusinesses(supabase)
 
@@ -150,33 +153,36 @@ async function fetchAllBusinesses(supabase: any) {
       changeFrequency: 'weekly'
     } => Boolean(route))
 
-    const { data: serviceCityData } = await supabase
-  .from('businesses')
-  .select('listing_type, city_slug')
+  // ----------------------------------------
+  // 6. SERVICE × CITY (lawn-care / mower-repair hub pages)
+  // ----------------------------------------
+  const { data: serviceCityData } = await supabase
+    .from('businesses')
+    .select('listing_type, city_slug')
 
-const serviceCityMap = new Map<string, number>()
-serviceCityData?.forEach(b => {
-  if (!b.listing_type || !b.city_slug) return
-  const key = `${b.listing_type}__${b.city_slug}`
-  serviceCityMap.set(key, (serviceCityMap.get(key) || 0) + 1)
-})
+  const serviceCityMap = new Map<string, number>()
+  serviceCityData?.forEach(b => {
+    if (!b.listing_type || !b.city_slug) return
+    const key = `${b.listing_type}__${b.city_slug}`
+    serviceCityMap.set(key, (serviceCityMap.get(key) || 0) + 1)
+  })
 
-const listingTypeToSlug: Record<string, string> = {
-  mowing: 'lawn-care',
-  repairs: 'mower-repair',
-}
-
-const serviceCityRoutes = Array.from(serviceCityMap.entries()).map(([key, count]) => {
-  const [listingType, citySlug] = key.split('__')
-  const serviceSlug = listingTypeToSlug[listingType]
-  if (!serviceSlug) return null
-  return {
-    url: `${baseUrl}/${serviceSlug}/${citySlug}`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly' as const,
-    priority: 0.75,
+  const listingTypeToSlug: Record<string, string> = {
+    mowing: 'lawn-care',
+    repairs: 'mower-repair',
   }
-}).filter((r): r is NonNullable<typeof r> => Boolean(r))
+
+  const serviceCityRoutes = Array.from(serviceCityMap.entries()).map(([key]) => {
+    const [listingType, citySlug] = key.split('__')
+    const serviceSlug = listingTypeToSlug[listingType]
+    if (!serviceSlug) return null
+    return {
+      url: `${baseUrl}/${serviceSlug}/${citySlug}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.75,
+    }
+  }).filter((r): r is NonNullable<typeof r> => Boolean(r))
 
   // ----------------------------------------
   // FINAL OUTPUT
@@ -188,12 +194,6 @@ const serviceCityRoutes = Array.from(serviceCityMap.entries()).map(([key, count]
     ...cityRoutes,
     ...categoryCityRoutes,
     ...serviceCityRoutes,
-    {
-      url: `${baseUrl}/locations`,
-      lastModified: new Date(),
-      changeFrequency: 'daily' as const,
-      priority: 1
-    }
   ]
 
   return allRoutes
