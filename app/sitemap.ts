@@ -150,6 +150,34 @@ async function fetchAllBusinesses(supabase: any) {
       changeFrequency: 'weekly'
     } => Boolean(route))
 
+    const { data: serviceCityData } = await supabase
+  .from('businesses')
+  .select('listing_type, city_slug')
+
+const serviceCityMap = new Map<string, number>()
+serviceCityData?.forEach(b => {
+  if (!b.listing_type || !b.city_slug) return
+  const key = `${b.listing_type}__${b.city_slug}`
+  serviceCityMap.set(key, (serviceCityMap.get(key) || 0) + 1)
+})
+
+const listingTypeToSlug: Record<string, string> = {
+  mowing: 'lawn-care',
+  repairs: 'mower-repair',
+}
+
+const serviceCityRoutes = Array.from(serviceCityMap.entries()).map(([key, count]) => {
+  const [listingType, citySlug] = key.split('__')
+  const serviceSlug = listingTypeToSlug[listingType]
+  if (!serviceSlug) return null
+  return {
+    url: `${baseUrl}/${serviceSlug}/${citySlug}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly' as const,
+    priority: 0.75,
+  }
+}).filter((r): r is NonNullable<typeof r> => Boolean(r))
+
   // ----------------------------------------
   // FINAL OUTPUT
   // ----------------------------------------
@@ -158,7 +186,14 @@ async function fetchAllBusinesses(supabase: any) {
     ...businessRoutes,
     ...categoryRoutes,
     ...cityRoutes,
-    ...categoryCityRoutes
+    ...categoryCityRoutes,
+    ...serviceCityRoutes,
+    {
+      url: `${baseUrl}/locations`,
+      lastModified: new Date(),
+      changeFrequency: 'daily' as const,
+      priority: 1
+    }
   ]
 
   return allRoutes

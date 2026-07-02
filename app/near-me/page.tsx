@@ -25,34 +25,39 @@ export default function NearMeIndexPage() {
       const supabase = createClient()
       const { data: businesses } = await supabase
         .from('businesses')
-        .select('city, rating')
+        .select('city, city_slug, rating')
         .not('city', 'is', null)
-      
+        .not('city_slug', 'is', null)
+
       if (businesses) {
         const cityMap = new Map()
         businesses.forEach(biz => {
-          if (!cityMap.has(biz.city)) {
-            cityMap.set(biz.city, { count: 0, ratingSum: 0, ratingCount: 0 })
+          const key = biz.city_slug   // group by the canonical slug, not the raw name
+          if (!cityMap.has(key)) {
+            cityMap.set(key, { name: biz.city, slug: biz.city_slug, count: 0, ratingSum: 0, ratingCount: 0 })
           }
-          const city = cityMap.get(biz.city)
+          const city = cityMap.get(key)
           city.count++
           if (biz.rating) {
             city.ratingSum += parseFloat(biz.rating)
             city.ratingCount++
           }
         })
-        
-        const cities = Array.from(cityMap.entries()).map(([name, data]) => ({
-          name,
-          slug: encodeURIComponent(name.replace(/ /g, '-')),
-          count: data.count,
-          rating: data.ratingCount > 0 ? data.ratingSum / data.ratingCount : 0
-        })).sort((a, b) => b.count - a.count).slice(0, 8)
-        
+
+        const cities = Array.from(cityMap.values())
+          .map(c => ({
+            name: c.name,
+            slug: c.slug,
+            count: c.count,
+            rating: c.ratingCount > 0 ? c.ratingSum / c.ratingCount : 0
+          }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 8)
+
         setPopularCities(cities)
       }
     }
-    
+
     fetchPopularCities()
   }, [])
 
