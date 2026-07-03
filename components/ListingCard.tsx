@@ -1,3 +1,4 @@
+"use client"
 import Link from 'next/link'
 import { Star, MapPin, Phone, Globe } from 'lucide-react'
 
@@ -8,13 +9,18 @@ interface Business {
   address?: string | null
   phone?: string | null
   website?: string | null
-  rating?: string | null
+  rating?: number | null
+  google_reviews_count?: string | null
   category?: string | null
   city?: string | null
   state?: string | null
   description?: string | null
   listing_type?: 'repairs' | 'mowing' | null
-
+  google_image_url?: string | null
+  is_verified?: boolean | null
+  is_open_now?: boolean | null
+  distance_miles?: number | null
+  tags?: string[] | null
 }
 
 interface ListingCardProps {
@@ -23,67 +29,98 @@ interface ListingCardProps {
   showActions?: boolean
 }
 
-export default function ListingCard({ 
-  business, 
-  variant = 'default', 
-  showActions = true 
-}: ListingCardProps) {
-  const ratingNumber = business.rating ? parseFloat(business.rating) : 0
-  const fullStars = Math.floor(ratingNumber)
-  const hasHalfStar = ratingNumber % 1 >= 0.5
-  const getListingLabel = (type?: 'repairs' | 'mowing' | null) => {
-    switch (type) {
-      case 'repairs':
-        return 'Repair Shop'
-      case 'mowing':
-        return 'Lawn Care'
-      default:
-        return 'Service'
-    }
+function getListingLabel(type?: 'repairs' | 'mowing' | null) {
+  switch (type) {
+    case 'repairs':
+      return 'Repair Shop'
+    case 'mowing':
+      return 'Lawn Care'
+    default:
+      return 'Service'
   }
+}
 
+function BusinessSchema({ business, ratingValue }: { business: Business; ratingValue: number | null }) {
+  if (ratingValue === null) return null
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{
+        __html: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'LocalBusiness',
+          name: business.name,
+          address: {
+            '@type': 'PostalAddress',
+            streetAddress: business.address || undefined,
+            addressLocality: business.city || undefined,
+            addressRegion: business.state || undefined,
+          },
+          telephone: business.phone || undefined,
+          url: business.website || undefined,
+        }),
+      }}
+    />
+  )
+}
+
+export default function ListingCard({
+  business,
+  variant = 'default',
+  showActions = true,
+}: ListingCardProps) {
+  // rating is a numeric column — only fall back when null/0
+  const ratingValue = business.rating && business.rating > 0 ? business.rating : null
+  const fullStars = ratingValue ? Math.floor(ratingValue) : 0
+  const hasHalfStar = ratingValue ? ratingValue % 1 >= 0.5 : false
+
+  // ---------------- COMPACT ----------------
   if (variant === 'compact') {
     return (
       <Link href={`/listings/${business.slug}`}>
         <div className="bg-white rounded-lg p-4 hover:shadow-md transition cursor-pointer border border-gray-100">
           <div className="flex justify-between items-start">
             <div>
-              <span className={`
-                  inline-block text-xs font-semibold px-2 py-1 rounded-full
-                  ${business.listing_type === 'repairs'
+              <span
+                className={`inline-block text-xs font-semibold px-2 py-1 rounded-full mb-2 ${
+                  business.listing_type === 'repairs'
                     ? 'bg-orange-100 text-orange-700'
-                    : 'bg-green-100 text-green-700'}
-                `}>
-                  {getListingLabel(business.listing_type)}
-                </span>
-                <span className={business.listing_type === 'mowing'
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-blue-100 text-blue-700'
-                  }>
-                    {business.listing_type}
-                </span>
+                    : 'bg-green-100 text-green-700'
+                }`}
+              >
+                {getListingLabel(business.listing_type)}
+              </span>
+
               <h3 className="font-semibold text-lg text-gray-800 hover:text-green-600">
                 {business.name}
               </h3>
+
               {business.city && (
                 <div className="flex items-center gap-1 text-sm text-gray-500 mt-1">
                   <MapPin size={14} />
                   <span>{business.city}, {business.state}</span>
+                  {typeof business.distance_miles === 'number' && (
+                    <span className="text-gray-400">· {business.distance_miles.toFixed(1)} mi</span>
+                  )}
                 </div>
               )}
             </div>
-            {business.rating && (
-              <div className="flex items-center gap-1 bg-green-50 px-2 py-1 rounded">
+
+            {ratingValue !== null && (
+              <div className="flex items-center gap-1 bg-green-50 px-2 py-1 rounded flex-shrink-0">
                 <Star size={14} className="text-yellow-500 fill-current" />
-                <span className="font-medium text-sm">{business.rating}</span>
+                <span className="font-medium text-sm">{ratingValue.toFixed(1)}</span>
               </div>
             )}
           </div>
         </div>
+        <BusinessSchema business={business} ratingValue={ratingValue} />
       </Link>
     )
   }
 
+  // ---------------- FEATURED ----------------
   if (variant === 'featured') {
     return (
       <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg shadow-md overflow-hidden border border-green-100">
@@ -95,6 +132,9 @@ export default function ListingCard({
                 {business.category && (
                   <span className="text-xs text-gray-500">{business.category}</span>
                 )}
+                {business.is_verified && (
+                  <span title="Verified business" className="text-blue-500 text-sm">✓ Verified</span>
+                )}
               </div>
               <Link href={`/listings/${business.slug}`}>
                 <h2 className="text-2xl font-bold text-gray-800 hover:text-green-600 transition">
@@ -102,30 +142,44 @@ export default function ListingCard({
                 </h2>
               </Link>
             </div>
-            {business.rating && (
-              <div className="flex items-center gap-2">
+
+            {ratingValue !== null && (
+              <div className="flex items-center gap-2 flex-shrink-0">
                 <div className="flex">
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
                       size={18}
-                      className={`${
-                        i < fullStars 
-                          ? 'text-yellow-500 fill-current' 
+                      className={
+                        i < fullStars
+                          ? 'text-yellow-500 fill-current'
                           : i === fullStars && hasHalfStar
                           ? 'text-yellow-500 fill-current opacity-50'
                           : 'text-gray-300'
-                      }`}
+                      }
                     />
                   ))}
                 </div>
-                <span className="font-bold text-lg">{business.rating}</span>
+                <span className="font-bold text-lg">{ratingValue.toFixed(1)}</span>
+                {typeof business.google_reviews_count === 'number' && (
+                  <span className="text-gray-400 text-sm">({business.google_reviews_count})</span>
+                )}
               </div>
             )}
           </div>
 
           {business.description && (
             <p className="text-gray-600 mb-4 line-clamp-2">{business.description}</p>
+          )}
+
+          {business.tags && business.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {business.tags.slice(0, 4).map((tag) => (
+                <span key={tag} className="text-xs bg-white text-green-700 px-2 py-1 rounded-full border border-green-200">
+                  {tag}
+                </span>
+              ))}
+            </div>
           )}
 
           <div className="flex flex-wrap gap-4 mb-4 text-sm text-gray-500">
@@ -141,90 +195,137 @@ export default function ListingCard({
                 <span>{business.phone}</span>
               </div>
             )}
+            {business.is_open_now !== null && business.is_open_now !== undefined && (
+              <span className={business.is_open_now ? 'text-green-600 font-medium' : 'text-gray-500'}>
+                {business.is_open_now ? 'Open now' : 'Closed now'}
+              </span>
+            )}
           </div>
 
           {showActions && (
             <div className="flex gap-3">
-              <Link href={`/listings/${business.slug}`}>
-                <button className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition">
-                  View Details
-                </button>
+              <Link
+                href={`/listings/${business.slug}`}
+                className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition inline-block"
+              >
+                View Details
               </Link>
               {business.website && (
-                <a href={business.website} target="_blank" rel="noopener noreferrer">
-                  <button className="border border-gray-300 px-6 py-2 rounded-lg hover:bg-gray-50 transition">
-                    Visit Website
-                  </button>
+                <a
+                  href={business.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="border border-gray-300 px-6 py-2 rounded-lg hover:bg-gray-50 transition inline-block"
+                >
+                  Visit Website
                 </a>
               )}
             </div>
           )}
         </div>
+        <BusinessSchema business={business} ratingValue={ratingValue} />
       </div>
     )
   }
 
-  // Default variant
+  // ---------------- DEFAULT ----------------
   return (
-    <Link href={`/listings/${business.slug}`}>
-      <div className="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden group">
-        <div className="p-6">
-          <div className="flex justify-between items-start mb-3">
+    <div className="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group">
+      <Link href={`/listings/${business.slug}`} className="block p-6">
+        <div className="flex justify-between items-start mb-3">
+          <div className="flex gap-3">
+            {business.google_image_url ? (
+              <img
+                src={business.google_image_url}
+                alt={`${business.name} logo`}
+                className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+              />
+            ) : (
+              <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold flex-shrink-0">
+                {business.name.charAt(0)}
+              </div>
+            )}
             <div>
-              <h2 className="text-xl font-bold text-gray-800 group-hover:text-green-600 transition mb-1">
-                {business.name}
-              </h2>
+              <div className="flex items-center gap-2 mb-1">
+                <h2 className="text-xl font-bold text-gray-800 group-hover:text-green-600 transition">
+                  {business.name}
+                </h2>
+                {business.is_verified && (
+                  <span title="Verified business" className="text-blue-500 text-sm">✓</span>
+                )}
+              </div>
               {business.category && (
                 <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
                   {business.category}
                 </span>
               )}
             </div>
-            {business.rating && (
+          </div>
+
+          {ratingValue !== null ? (
+            <div className="flex flex-col items-end flex-shrink-0">
               <div className="flex items-center gap-1">
                 <Star className="text-yellow-500 fill-current" size={18} />
-                <span className="font-semibold">{business.rating}</span>
-                <span className="text-gray-400 text-sm">(24)</span>
+                <span className="font-semibold">{ratingValue.toFixed(1)}</span>
               </div>
+              {typeof business.google_reviews_count === 'string' && (
+                <span className="text-gray-400 text-xs">
+                  {business.google_reviews_count} review{business.google_reviews_count === "1" ? '' : 's'}
+                </span>
+              )}
+            </div>
+          ) : (
+            <span className="text-gray-400 text-xs flex-shrink-0">No ratings yet</span>
+          )}
+        </div>
+
+        {business.address && (
+          <div className="flex items-center gap-2 text-gray-600 mb-2">
+            <MapPin size={16} />
+            <span className="text-sm">
+              {business.address}, {business.city}, {business.state}
+            </span>
+            {typeof business.distance_miles === 'number' && (
+              <span className="text-xs text-gray-400">· {business.distance_miles.toFixed(1)} mi</span>
             )}
           </div>
+        )}
 
-          {business.address && (
-            <div className="flex items-center gap-2 text-gray-600 mb-2">
-              <MapPin size={16} />
-              <span className="text-sm">
-                {business.address}, {business.city}, {business.state}
-              </span>
-            </div>
-          )}
-
-          {business.description && (
-            <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-              {business.description}
-            </p>
-          )}
-
-          <div className="flex items-center justify-between pt-3 border-t">
-            <div className="flex gap-3">
-              {business.phone && (
-                <div className="flex items-center gap-1 text-gray-500 text-sm">
-                  <Phone size={14} />
-                  <span>Call</span>
-                </div>
-              )}
-              {business.website && (
-                <div className="flex items-center gap-1 text-gray-500 text-sm">
-                  <Globe size={14} />
-                  <span>Website</span>
-                </div>
-              )}
-            </div>
-            <div className="text-green-600 group-hover:translate-x-1 transition-transform">
-              →
-            </div>
+        {business.is_open_now !== null && business.is_open_now !== undefined && (
+          <div className={`text-xs font-medium mb-2 ${business.is_open_now ? 'text-green-600' : 'text-gray-500'}`}>
+            {business.is_open_now ? 'Open now' : 'Closed now'}
           </div>
+        )}
+
+        {business.description && (
+          <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+            {business.description}
+          </p>
+        )}
+
+        {business.tags && business.tags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-3">
+            {business.tags.slice(0, 3).map((tag) => (
+              <span key={tag} className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-full">
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+      </Link>
+      {showActions && (
+        <div className="border-t border-gray-100 p-4 flex justify-end">
+          
+          <Link
+            href={`/listings/${business.slug}`}
+            className="text-green-600 group-hover:translate-x-1 transition-transform text-sm font-medium"
+          >
+            View →
+          </Link>
         </div>
-      </div>
-    </Link>
+      )}
+
+      <BusinessSchema business={business} ratingValue={ratingValue} />
+    </div>
   )
 }
