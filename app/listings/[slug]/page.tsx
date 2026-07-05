@@ -1,5 +1,5 @@
+import { notFound, permanentRedirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
-import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Star, MapPin, Phone, Globe, Share2, Bookmark, CheckCircle } from 'lucide-react'
 import MapWrapper from '@/components/MapWrapper'
@@ -25,22 +25,34 @@ export default async function ListingPage({ params }: PageProps) {
   const { slug } = await params
   const supabase = await createClient()
   
+   const id = Number(slug.split("-").pop())
+
+  if (isNaN(id)) {
+    notFound()
+  }
+
+  // Fetch by ID instead of slug
   const { data: business } = await supabase
-    .from('businesses')
-    .select('*')
-    .eq('slug', slug)
+    .from("businesses")
+    .select("*")
+    .eq("id", id)
     .single()
-  
+
   if (!business) {
     notFound()
   }
-  
+
+  // Redirect old or incorrect slugs to the canonical slug
+  if (slug !== business.slug) {
+    permanentRedirect(`/listings/${business.slug}`)
+  }
+
   // Get similar businesses
   const { data: similar } = await supabase
-    .from('businesses')
-    .select('*')
-    .eq('category', business.category)
-    .neq('id', business.id)
+    .from("businesses")
+    .select("*")
+    .eq("category", business.category)
+    .neq("id", business.id)
     .limit(3)
 
   return (
