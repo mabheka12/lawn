@@ -52,7 +52,6 @@ export default function NearMeIndexPage() {
             rating: c.ratingCount > 0 ? c.ratingSum / c.ratingCount : 0
           }))
           .sort((a, b) => b.count - a.count)
-          .slice(0, 8)
 
         setPopularCities(cities)
       }
