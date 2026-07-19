@@ -16,7 +16,6 @@ interface Business {
   state?: string | null
   description?: string | null
   listing_type?: 'repairs' | 'mowing' | null
-  google_image_url?: string | null
   is_verified?: boolean | null
   is_open_now?: boolean | null
   distance_miles?: number | null
@@ -234,13 +233,8 @@ export default function ListingCard({
       <Link href={`/listings/${business.slug}`} className="block p-6">
         <div className="flex justify-between items-start mb-3">
           <div className="flex gap-3">
-            {business.google_image_url ? (
-              <img
-                src={business.google_image_url}
-                alt={`${business.name} logo`}
-                className="w-12 h-12 rounded-full object-cover flex-shrink-0"
-              />
-            ) : (
+          
+          {(
               <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold flex-shrink-0">
                 {business.name.charAt(0)}
               </div>

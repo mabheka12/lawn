@@ -84,23 +84,29 @@ const topCities = Array.from(cityMap.values())
         />
 
         {/* HERO */}
-        <section className="bg-gradient-to-r from-green-600 to-green-800 text-white py-20">
-          <div className="container mx-auto px-4">
-            <h1 className="text-5xl font-bold mb-4 text-center">
-              Find Lawn Mowing & Lawn Mower Repair Services Near Me
-            </h1>
+        <section className="relative overflow-hidden py-24">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: "url('/lawn-hero.webp')",
+          }}
+        />
 
-            <p className="text-xl mb-8 text-center max-w-3xl mx-auto">
-              Whether you need a reliable lawn mowing service near you, a full lawn
-              care and maintenance plan, or a trusted repair shop for a broken mower,
-              our directory connects you with vetted local businesses across the US
-              and Australia — including mobile mower repair, blade sharpening,
-              fertilizing, and landscaping specialists.
-            </p>
+        <div className="absolute inset-0 bg-black/55" />
 
-            <SearchBar variant="hero" />
-          </div>
-        </section>
+        <div className="relative container mx-auto px-4 text-center text-white">
+          <h1 className="text-5xl font-bold mb-4">
+            Find Lawn Mowing & Lawn Mower Repair Services Near You
+          </h1>
+
+          <p className="max-w-3xl mx-auto text-xl mb-8">
+            Compare trusted lawn care professionals, landscaping companies, and mower
+            repair shops across the US and Australia.
+          </p>
+
+          <SearchBar variant="hero" />
+        </div>
+      </section>
 
         {/* INTRO / SEO CONTENT — sibling of hero, plain background so text reads normally */}
         <section className="py-12 bg-white">

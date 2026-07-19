@@ -107,13 +107,7 @@ export default async function ListingPage({ params }: PageProps) {
               {/* Contact Info */}
               <div className="bg-gray-50 rounded-lg p-6 mb-6">
                 <div className="flex items-center gap-3 mb-4">  
-                  {business.google_image_url ? (
-              <img
-                src={business.google_image_url}
-                alt={`${business.name} logo`}
-                className="w-12 h-12 rounded-full object-cover flex-shrink-0"
-              />
-            ) : (
+               { (
               <div className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-gray-600">
                 <span className="text-lg font-bold">{business.name.charAt(0)}</span>
               </div>

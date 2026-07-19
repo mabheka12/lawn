@@ -16,7 +16,7 @@ export default function AboutPage() {
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-5xl font-bold mb-4">About Lawn Mowing Near Me</h1>
           <p className="text-xl max-w-3xl mx-auto">
-            Connecting homeowners with trusted lawn mowing professionals since 2024.  
+            Connecting homeowners with trusted lawn mowing professionals.  
           </p>
         </div>
       </section>
@@ -33,30 +33,6 @@ export default function AboutPage() {
             a comprehensive, easy-to-use directory that connects homeowners with trusted 
             professionals in their area.
           </p>
-        </div>
-      </section>
-
-      {/* Stats Section */}
-      <section className="bg-white py-16">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="text-4xl font-bold text-green-600 mb-2">500+</div>
-              <div className="text-gray-600">Verified Businesses</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-green-600 mb-2">50+</div>
-              <div className="text-gray-600">Cities Covered</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-green-600 mb-2">1000+</div>
-              <div className="text-gray-600">Happy Customers</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-green-600 mb-2">4.8</div>
-              <div className="text-gray-600">Average Rating</div>
-            </div>
-          </div>
         </div>
       </section>
 
