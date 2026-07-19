@@ -3,6 +3,7 @@ import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 import { Star, MapPin, Phone, Globe, Share2, Bookmark, CheckCircle } from 'lucide-react'
 import MapWrapper from '@/components/MapWrapper'
+import WeatherWidget from '@/components/WeatherWidget'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -233,6 +234,7 @@ export default async function ListingPage({ params }: PageProps) {
 
           {/* Sidebar with Map */}
           <div className="lg:w-1/3">
+          <WeatherWidget city={business.city || ''} />
             <MapWrapper
               businessName={business.name}
               address={business.address || ''}
@@ -240,6 +242,7 @@ export default async function ListingPage({ params }: PageProps) {
               state={business.state || ''}
               country={business.country || 'USA'}
             />
+            
 
             {/* Similar Businesses */}
             {similar && similar.length > 0 && (
