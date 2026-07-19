@@ -232,7 +232,7 @@ export default async function ListingPage({ params }: PageProps) {
           </div>
 
 
-          {/* Sidebar with Map */}
+          {/* Sidebar with Map & Weather Widget */}
           <div className="lg:w-1/3">
           <WeatherWidget city={business.city || ''} />
             <MapWrapper
