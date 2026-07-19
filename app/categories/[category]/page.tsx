@@ -1,7 +1,26 @@
 import { createClient } from '@/utils/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import ListingCard from '@/components/ListingCard'
+
+
+// Map each category slug to its image in /public/categories/
+const CATEGORY_IMAGES: Record<string, string> = {
+  'garden-design': '/categories/garden-design.webp',
+  'landscaping': '/categories/landscaping.webp',
+  'tree-services': '/categories/tree-services.webp',
+  'lawn-care': '/categories/lawn-care.webp',
+  'turf-installation': '/categories/turf-installation.webp',
+  'hardscaping': '/categories/hardscaping.webp',
+  'repairs': '/categories/repairs.webp',
+}
+
+const DEFAULT_CATEGORY_IMAGE = '/categories/default.webp'
+
+function getCategoryImage(slug: string): string {
+  return CATEGORY_IMAGES[slug] || DEFAULT_CATEGORY_IMAGE
+}
 
 interface PageProps {
   params: Promise<{
@@ -99,9 +118,19 @@ export default async function CategoryPage({ params }: PageProps) {
             ← Back to Categories
           </Link>
 
-          <h1 className="text-4xl font-bold mt-3">
-            {categoryRow.name}
-          </h1>
+          <div className="flex items-center justify-between gap-4 mt-3">
+            <h1 className="text-4xl font-bold">
+              {categoryRow.name}
+            </h1>
+
+            <Image
+              src={getCategoryImage(categoryRow.slug)}
+              alt={categoryRow.name}
+              width={200}
+              height={200}
+              className="rounded-lg object-cover w-70 h-50 flex-shrink-0"
+            />
+          </div>
 
           <p className="text-white/90 mt-2">
             Browse trusted {categoryRow.name.toLowerCase()} services near you

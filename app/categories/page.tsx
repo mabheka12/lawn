@@ -21,36 +21,35 @@ function getCategoryIcon(slug: string) {
 export default async function CategoriesPage() {
   const supabase = await createClient()
 
-  // Query 1
+  // Query 1: get categories
   const { data: categories } = await supabase
     .from('categories')
     .select('*')
     .order('name')
 
-  // Query 2
-  const { data: businesses } = await supabase
-    .from('businesses')
-    .select('primary_category')
+  // Query 2: get an EXACT count per category via head:true requests.
+  // This avoids Supabase/PostgREST's default 1000-row cap that you'd hit
+  // if you tried to fetch all `primary_category` values and count in JS.
+  // head:true means no rows are transferred, just the count -- cheap.
+  const categoriesWithCounts = await Promise.all(
+    (categories || []).map(async (category) => {
+      const { count } = await supabase
+        .from('businesses')
+        .select('*', { count: 'exact', head: true })
+        .eq('primary_category', category.name)
+        .eq('status', 'approved') // adjust/remove if you don't want to filter by status here
 
-  // Build counts map
-  const categoryCounts =
-    businesses?.reduce((acc, business) => {
-      if (!business.primary_category) return acc
+      return {
+        ...category,
+        count: count || 0,
+      }
+    })
+  )
 
-      acc[business.primary_category] =
-        (acc[business.primary_category] || 0) + 1
-
-      return acc
-    }, {} as Record<string, number>) || {}
-
-  const categoriesWithCounts =
-    categories?.map((category) => ({
-      ...category,
-      count: categoryCounts[category.name] || 0,
-    })) || []
-
-  const totalBusinesses =
-    businesses?.length || 0
+  const totalBusinesses = categoriesWithCounts.reduce(
+    (sum, c) => sum + c.count,
+    0
+  )
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -120,7 +119,7 @@ export default async function CategoriesPage() {
 
             <div>
               <div className="font-bold text-3xl text-green-600">
-                {categoriesWithCounts.length}
+                {categoriesWithCounts.length}+
               </div>
 
               <div className="text-gray-600">
@@ -143,4 +142,3 @@ export default async function CategoriesPage() {
     </div>
   )
 }
-
