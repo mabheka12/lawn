@@ -69,6 +69,8 @@ export default async function ListingPage({ params }: PageProps) {
           <span className="text-gray-700">{business.name}</span>
         </div>
 
+      
+
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Main Content */}
           <div className="lg:w-2/3">
