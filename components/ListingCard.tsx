@@ -20,6 +20,7 @@ interface Business {
   is_open_now?: boolean | null
   distance_miles?: number | null
   tags?: string[] | null
+  featured_until?: string | null
 }
 
 interface ListingCardProps {
@@ -37,6 +38,20 @@ function getListingLabel(type?: 'repairs' | 'mowing' | null) {
     default:
       return 'Service'
   }
+}
+
+function isCurrentlyFeatured(featuredUntil?: string | null) {
+  return !!featuredUntil && new Date(featuredUntil) > new Date()
+}
+
+function FeaturedBadge({ className = '' }: { className?: string }) {
+  return (
+    <span
+      className={`inline-block text-xs font-semibold px-2 py-1 rounded-full bg-amber-100 text-amber-800 ${className}`}
+    >
+      ★ Featured
+    </span>
+  )
 }
 
 function BusinessSchema({ business, ratingValue }: { business: Business; ratingValue: number | null }) {
@@ -73,6 +88,7 @@ export default function ListingCard({
   const ratingValue = business.rating && business.rating > 0 ? business.rating : null
   const fullStars = ratingValue ? Math.floor(ratingValue) : 0
   const hasHalfStar = ratingValue ? ratingValue % 1 >= 0.5 : false
+  const featured = isCurrentlyFeatured(business.featured_until)
 
   // ---------------- COMPACT ----------------
   if (variant === 'compact') {
@@ -81,15 +97,18 @@ export default function ListingCard({
         <div className="bg-white rounded-lg p-4 hover:shadow-md transition cursor-pointer border border-gray-100">
           <div className="flex justify-between items-start">
             <div>
-              <span
-                className={`inline-block text-xs font-semibold px-2 py-1 rounded-full mb-2 ${
-                  business.listing_type === 'repairs'
-                    ? 'bg-orange-100 text-orange-700'
-                    : 'bg-green-100 text-green-700'
-                }`}
-              >
-                {getListingLabel(business.listing_type)}
-              </span>
+              <div className="flex items-center gap-2 mb-2">
+                <span
+                  className={`inline-block text-xs font-semibold px-2 py-1 rounded-full ${
+                    business.listing_type === 'repairs'
+                      ? 'bg-orange-100 text-orange-700'
+                      : 'bg-green-100 text-green-700'
+                  }`}
+                >
+                  {getListingLabel(business.listing_type)}
+                </span>
+                {featured && <FeaturedBadge />}
+              </div>
 
               <h3 className="font-semibold text-lg text-gray-800 hover:text-green-600">
                 {business.name}
@@ -233,7 +252,7 @@ export default function ListingCard({
       <Link href={`/listings/${business.slug}`} className="block p-6">
         <div className="flex justify-between items-start mb-3">
           <div className="flex gap-3">
-          
+
           {(
               <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold flex-shrink-0">
                 {business.name.charAt(0)}
@@ -248,11 +267,14 @@ export default function ListingCard({
                   <span title="Verified business" className="text-blue-500 text-sm">✓</span>
                 )}
               </div>
-              {business.category && (
-                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
-                  {business.category}
-                </span>
-              )}
+              <div className="flex items-center gap-2">
+                {business.category && (
+                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                    {business.category}
+                  </span>
+                )}
+                {featured && <FeaturedBadge />}
+              </div>
             </div>
           </div>
 
@@ -309,7 +331,7 @@ export default function ListingCard({
       </Link>
       {showActions && (
         <div className="border-t border-gray-100 p-4 flex justify-end">
-          
+
           <Link
             href={`/listings/${business.slug}`}
             className="text-green-600 group-hover:translate-x-1 transition-transform text-sm font-medium"

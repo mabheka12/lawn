@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextResponse } from 'next/server'
+import { notifyAdminNewListing } from '@/lib/email'
 
 export async function POST(req: Request) {
   try {
@@ -55,6 +56,8 @@ export async function POST(req: Request) {
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
+
+    await notifyAdminNewListing({ name: data.name, city: data.city, listing_type: data.listing_type })
 
     return NextResponse.json({
       success: true,

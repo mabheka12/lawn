@@ -56,6 +56,40 @@ export default async function ListingPage({ params }: PageProps) {
     .neq("id", business.id)
     .limit(3)
 
+    // Determine ownership + claim/edit state for action buttons
+  const { data: { user } } = await supabase.auth.getUser()
+
+  let isOwnerOrSubmitter = false
+  let hasPendingEdit = false
+  let hasPendingClaim = false
+
+  if (user) {
+    isOwnerOrSubmitter =
+      business.owner_id === user.id ||
+      (!!business.submitted_by_email &&
+        business.submitted_by_email.toLowerCase() === (user.email ?? '').toLowerCase())
+
+    if (isOwnerOrSubmitter) {
+      const { data: pendingEdit } = await supabase
+        .from('pending_edits')
+        .select('id')
+        .eq('business_id', business.id)
+        .eq('submitted_by', user.id)
+        .eq('status', 'pending')
+        .maybeSingle()
+      hasPendingEdit = !!pendingEdit
+    } else if (!business.is_claimed) {
+      const { data: pendingClaim } = await supabase
+        .from('claim_requests')
+        .select('id')
+        .eq('business_id', business.id)
+        .eq('user_id', user.id)
+        .eq('status', 'pending')
+        .maybeSingle()
+      hasPendingClaim = !!pendingClaim
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
@@ -97,7 +131,36 @@ export default async function ListingPage({ params }: PageProps) {
                     </div>
                   )}
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 items-start">
+                  {isOwnerOrSubmitter ? (
+                    hasPendingEdit ? (
+                      <span className="text-sm bg-yellow-100 text-yellow-800 px-4 py-2 rounded">
+                        Edit pending review
+                      </span>
+                    ) : (
+                      <Link
+                        href={`/my-listings/${business.id}/edit`}
+                        className="text-sm bg-green-600 text-white px-4 py-2 rounded whitespace-nowrap"
+                      >
+                        Edit Listing
+                      </Link>
+                    )
+                  ) : business.is_claimed ? (
+                    <span className="text-sm bg-gray-100 text-gray-600 px-4 py-2 rounded flex items-center gap-1">
+                      <CheckCircle size={14} /> Claimed
+                    </span>
+                  ) : hasPendingClaim ? (
+                    <span className="text-sm bg-yellow-100 text-yellow-800 px-4 py-2 rounded">
+                      Claim pending review
+                    </span>
+                  ) : (
+                    <Link
+                      href={`/claim/${business.id}`}
+                      className="text-sm bg-white border border-green-600 text-green-600 px-4 py-2 rounded whitespace-nowrap"
+                    >
+                      Claim this listing
+                    </Link>
+                  )}
                   <button className="p-2 bg-gray-100 rounded-full hover:bg-gray-200">
                     <Bookmark size={20} />
                   </button>

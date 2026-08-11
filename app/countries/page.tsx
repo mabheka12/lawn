@@ -80,7 +80,7 @@ export default async function CountriesPage() {
 // Helper functions
 function getCountryCode(country: string): string {
   const codes: Record<string, string> = {
-    'USA': 'US',
+    'United States': 'US',
     'Canada': 'CA',
     'United Kingdom': 'GB',
     'Australia': 'AU'
@@ -90,7 +90,7 @@ function getCountryCode(country: string): string {
 
 function getCountryFlag(country: string): string {
   const flags: Record<string, string> = {
-    'USA': '🇺🇸',
+    'United States': '🇺🇸',
     'Canada': '🇨🇦',
     'United Kingdom': '🇬🇧',
     'Australia': '🇦🇺'

@@ -5,10 +5,40 @@ import Link from 'next/link'
 import {
   Wrench,
   Star,
-  TrendingUp,
   Award,
   Sprout,
 } from 'lucide-react'
+
+async function getFeaturedOrTop(supabase: any, listingType: string, limit: number) {
+  const { data: featured } = await supabase
+    .from('businesses')
+    .select('*')
+    .eq('listing_type', listingType)
+    .gt('featured_until', new Date().toISOString())
+    .order('featured_until', { ascending: false })
+    .limit(limit)
+
+  const results = featured ?? []
+  if (results.length >= limit) {
+    return { listings: results, featuredCount: results.length }
+  }
+
+  const excludeIds = results.map((b: any) => b.id)
+  let fallbackQuery = supabase
+    .from('businesses')
+    .select('*')
+    .eq('listing_type', listingType)
+    .order('rating', { ascending: false })
+    .limit(limit - results.length)
+
+  if (excludeIds.length > 0) {
+    fallbackQuery = fallbackQuery.not('id', 'in', `(${excludeIds.join(',')})`)
+  }
+
+  const { data: fallback } = await fallbackQuery
+
+  return { listings: [...results, ...(fallback ?? [])], featuredCount: results.length }
+}
 
 export default async function HomePage() {
   const supabase = await createClient()
@@ -20,48 +50,33 @@ export default async function HomePage() {
     .order('name')
     .limit(8)
 
-  // Lawn Care Listings
-  const { data: lawnCareBusinesses } = await supabase
-    .from('businesses')
-    .select('*')
-    .eq('listing_type', 'mowing')
-    .order('rating', { ascending: false })
-    .limit(6)
+  // Featured Lawn Care (falls back to top-rated to fill remaining slots)
+  const { listings: lawnCareBusinesses, featuredCount: lawnCareFeaturedCount } =
+    await getFeaturedOrTop(supabase, 'mowing', 6)
 
-  // Repair Listings
-  const { data: repairBusinesses } = await supabase
-    .from('businesses')
-    .select('*')
-    .eq('listing_type', 'repairs')
-    .order('rating', { ascending: false })
-    .limit(6)
-
-  // Recent Listings
-  const { data: recentListings } = await supabase
-    .from('businesses')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(12)
+  // Featured Repairs (falls back to top-rated to fill remaining slots)
+  const { listings: repairBusinesses, featuredCount: repairFeaturedCount } =
+    await getFeaturedOrTop(supabase, 'repairs', 6)
 
   // Popular Cities (derived from businesses until a dedicated cities table exists)
   const { data: cityData } = await supabase
-  .from('businesses')
-  .select('city, city_slug')
-  .not('city_slug', 'is', null)
+    .from('businesses')
+    .select('city, city_slug')
+    .not('city_slug', 'is', null)
 
-const cityMap = new Map<string, { name: string; slug: string; count: number }>()
-cityData?.forEach((b) => {
-  const existing = cityMap.get(b.city_slug)
-  if (existing) {
-    existing.count++
-  } else {
-    cityMap.set(b.city_slug, { name: b.city, slug: b.city_slug, count: 1 })
-  }
-})
+  const cityMap = new Map<string, { name: string; slug: string; count: number }>()
+  cityData?.forEach((b) => {
+    const existing = cityMap.get(b.city_slug)
+    if (existing) {
+      existing.count++
+    } else {
+      cityMap.set(b.city_slug, { name: b.city, slug: b.city_slug, count: 1 })
+    }
+  })
 
-const topCities = Array.from(cityMap.values())
-  .sort((a, b) => b.count - a.count)
-  .slice(0, 8)
+  const topCities = Array.from(cityMap.values())
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 8)
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -85,30 +100,30 @@ const topCities = Array.from(cityMap.values())
 
         {/* HERO */}
         <section className="relative overflow-hidden py-24">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: "url('/lawn-hero.webp')",
-          }}
-        />
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{
+              backgroundImage: "url('/lawn-hero.webp')",
+            }}
+          />
 
-        <div className="absolute inset-0 bg-black/55" />
+          <div className="absolute inset-0 bg-black/55" />
 
-        <div className="relative container mx-auto px-4 text-center text-white">
-          <h1 className="text-5xl font-bold mb-4">
-            Find Lawn Mowing & Lawn Mower Repair Services Near You
-          </h1>
+          <div className="relative container mx-auto px-4 text-center text-white">
+            <h1 className="text-5xl font-bold mb-4">
+              Find Lawn Mowing & Lawn Mower Repair Services Near You
+            </h1>
 
-          <p className="max-w-3xl mx-auto text-xl mb-8">
-            Compare trusted lawn care professionals, landscaping companies, and mower
-            repair shops across the US and Australia.
-          </p>
+            <p className="max-w-3xl mx-auto text-xl mb-8">
+              Compare trusted lawn care professionals, landscaping companies, and mower
+              repair shops across the US and Australia.
+            </p>
 
-          <SearchBar variant="hero" />
-        </div>
-      </section>
+            <SearchBar variant="hero" />
+          </div>
+        </section>
 
-        {/* INTRO / SEO CONTENT — sibling of hero, plain background so text reads normally */}
+        {/* INTRO / SEO CONTENT */}
         <section className="py-12 bg-white">
           <div className="container mx-auto px-4 max-w-4xl">
             <h2 className="text-2xl font-bold mb-4">
@@ -131,6 +146,7 @@ const topCities = Array.from(cityMap.values())
             </p>
           </div>
         </section>
+
         {/* FAQ */}
         <section className="py-16 container mx-auto px-4 max-w-3xl">
           <h2 className="text-3xl font-bold mb-8 text-center">Frequently Asked Questions</h2>
@@ -138,22 +154,22 @@ const topCities = Array.from(cityMap.values())
             <div>
               <h3 className="font-semibold text-lg">How do I find a lawn mower repair shop near me?</h3>
               <p className="text-gray-700 mt-1">
-                Use the search bar above and enter your city or zip code. We'll show 
+                Use the search bar above and enter your city or zip code. We'll show
                 you rated repair shops, including mobile repair options, in your area.
               </p>
             </div>
             <div>
               <h3 className="font-semibold text-lg">What's the difference between lawn care and mower repair?</h3>
               <p className="text-gray-700 mt-1">
-                Lawn care companies mow, edge, and maintain your yard. Mower repair 
-                shops fix or service the equipment itself — blade sharpening, engine 
+                Lawn care companies mow, edge, and maintain your yard. Mower repair
+                shops fix or service the equipment itself — blade sharpening, engine
                 tune-ups, and mobile repairs.
               </p>
             </div>
             <div>
               <h3 className="font-semibold text-lg">Is mobile lawn mower repair available?</h3>
               <p className="text-gray-700 mt-1">
-                Yes — many listed businesses offer mobile repair, coming to your 
+                Yes — many listed businesses offer mobile repair, coming to your
                 home or property to service riding mowers and push mowers on-site.
               </p>
             </div>
@@ -189,50 +205,76 @@ const topCities = Array.from(cityMap.values())
           </div>
         </section>
 
-        {/* LAWN CARE */}
+        {/* FEATURED LAWN CARE */}
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <div className="flex justify-between items-center mb-8">
               <div className="flex items-center gap-3">
                 <Sprout className="text-green-600" size={32} />
-                <h2 className="text-3xl font-bold">Top Lawn Care Services</h2>
+                <h2 className="text-3xl font-bold">Featured Lawn Care Services</h2>
               </div>
               <div className="text-green-600 font-medium">
                 Landscaping • Lawn Care • Gardening
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {lawnCareBusinesses?.map((business) => (
-                <ListingCard key={business.id} business={business} variant="default" />
+           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {lawnCareBusinesses?.map((business: any) => (
+                <ListingCard
+                  key={business.id}
+                  business={business}
+                  variant="default"
+                />
               ))}
+              <Link
+                href="/my-listings"
+                className="border-2 border-dashed border-green-300 rounded-lg flex flex-col items-center justify-center text-center p-6 hover:border-green-500 hover:bg-green-50 transition"
+              >
+                <Sprout className="text-green-600 mb-2" size={28} />
+                <p className="font-semibold text-gray-800">Own a lawn care business?</p>
+                <p className="text-sm text-gray-500 mt-1">Get featured right here on the homepage.</p>
+                <span className="mt-3 text-green-600 font-medium text-sm">Request a spot →</span>
+              </Link>
             </div>
           </div>
         </section>
 
-        {/* REPAIR SHOPS */}
+        {/* FEATURED REPAIR SHOPS */}
         <section className="py-16">
           <div className="container mx-auto px-4">
             <div className="flex justify-between items-center mb-8">
               <div className="flex items-center gap-3">
                 <Wrench className="text-green-600" size={32} />
-                <h2 className="text-3xl font-bold">Top Repair Shops</h2>
+                <h2 className="text-3xl font-bold">Featured Repair Shops</h2>
               </div>
               <div className="flex items-center gap-2 text-green-600">
                 <Star size={18} fill="currentColor" />
-                <span>Highest Rated Repairs</span>
+                <span>Spotlighted Local Repairs</span>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {repairBusinesses?.map((business) => (
-                <ListingCard key={business.id} business={business} variant="default" />
+           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {repairBusinesses?.map((business: any) => (
+                <ListingCard
+                  key={business.id}
+                  business={business}
+                  variant="default"
+                />
               ))}
+              <Link
+                href="/my-listings"
+                className="border-2 border-dashed border-green-300 rounded-lg flex flex-col items-center justify-center text-center p-6 hover:border-green-500 hover:bg-green-50 transition"
+              >
+                <Wrench className="text-green-600 mb-2" size={28} />
+                <p className="font-semibold text-gray-800">Own a repair shop?</p>
+                <p className="text-sm text-gray-500 mt-1">Get featured right here on the homepage.</p>
+                <span className="mt-3 text-green-600 font-medium text-sm">Request a spot →</span>
+              </Link>
             </div>
           </div>
         </section>
 
-        {/* POPULAR LOCATIONS — bridges "our best listings" to "browse by area" */}
+        {/* POPULAR LOCATIONS */}
         {topCities.length > 0 && (
           <section className="py-16 bg-gray-50">
             <div className="container mx-auto px-4">
@@ -287,25 +329,6 @@ const topCities = Array.from(cityMap.values())
             </div>
           </section>
         )}
-
-        {/* RECENT */}
-        <section className="py-16 bg-white">
-          <div className="container mx-auto px-4">
-            <div className="flex justify-between items-center mb-8">
-              <h2 className="text-3xl font-bold">Recently Added Listings</h2>
-              <div className="flex items-center gap-2 text-gray-600">
-                <TrendingUp size={20} />
-                <span>Latest directory additions</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {recentListings?.map((business) => (
-                <ListingCard key={business.id} business={business} variant="compact" />
-              ))}
-            </div>
-          </div>
-        </section>
 
         {/* CTA */}
         <section className="bg-green-700 text-white py-16">
