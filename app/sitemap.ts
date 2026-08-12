@@ -184,6 +184,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }).filter((r): r is NonNullable<typeof r> => Boolean(r))
 
+  const blogRoutes = [
+    {
+      url: `${baseUrl}/blog`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8
+    }
+  ]
+
   // ----------------------------------------
   // FINAL OUTPUT
   // ----------------------------------------
@@ -194,6 +203,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...cityRoutes,
     ...categoryCityRoutes,
     ...serviceCityRoutes,
+    ...blogRoutes,
   ]
 
   return allRoutes
