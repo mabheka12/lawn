@@ -73,7 +73,7 @@ export default function RootLayout({
             gtag('config', 'G-HS88FYGGK6');
           `}
         </Script>
-        <script
+        <Script
             type="application/ld+json"
             dangerouslySetInnerHTML={{__html: JSON.stringify({
               "@context": "https://schema.org",

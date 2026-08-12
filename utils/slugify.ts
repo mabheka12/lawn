@@ -5,3 +5,5 @@ function slugify(text: string) {
     .trim()
     .replace(/\s+/g, '-')
 }
+
+export default slugify

@@ -204,6 +204,9 @@ export default function Navbar() {
             <Link href="/contact" className="text-gray-700 hover:text-green-600 transition">
               Contact
             </Link>
+            <Link href="blog" className="text-gray-700 hover:text-green-600 transition">
+              Blog
+            </Link>          
             
             {/* Quick Search by City */}
             <div className="relative">
