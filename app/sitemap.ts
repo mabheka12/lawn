@@ -184,14 +184,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }).filter((r): r is NonNullable<typeof r> => Boolean(r))
 
-  const blogRoutes = [
-    {
-      url: `${baseUrl}/blog`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.8
-    }
-  ]
+  const { data: blogData } = await supabase
+    .from('blog_posts')
+    .select('slug, created_at')
+
+  const blogRoutes = (blogData || []).map(b => ({
+    url: `${baseUrl}/blog/${b.slug}`,
+    lastModified: new Date(b.created_at),
+    changeFrequency: 'weekly' as const,
+    priority: 0.5
+  }))
 
   // ----------------------------------------
   // FINAL OUTPUT
