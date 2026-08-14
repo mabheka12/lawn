@@ -6,6 +6,28 @@ import {
   Sprout,
   Toolbox,
 } from 'lucide-react'
+import { Metadata } from 'next'
+export const metadata: Metadata = {
+  title: 'Lawn Care Service Categories | Browse by Service Type',
+  description:
+    'Browse lawn care, landscaping, tree services, turf installation, and mower repair categories. Compare trusted local businesses by service type across the US and Australia.',
+  alternates: {
+    canonical: 'https://www.lawnmowingnearme.org/categories',
+  },
+  openGraph: {
+    title: 'Lawn Care Service Categories | LawnMowingNearMe',
+    description:
+      'Browse lawn care, landscaping, tree services, turf installation, and mower repair categories.',
+    url: 'https://www.lawnmowingnearme.org/categories',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Lawn Care Service Categories | LawnMowingNearMe',
+    description:
+      'Browse lawn care, landscaping, tree services, turf installation, and mower repair categories.',
+  },
+}
 
 function getCategoryIcon(slug: string) {
   if (slug.includes('repair')) return Wrench

@@ -4,6 +4,43 @@ import Link from 'next/link'
 import Image from 'next/image'
 import ListingCard from '@/components/ListingCard'
 
+import type { Metadata } from 'next'
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { category } = await params
+  const supabase = await createClient()
+  const categorySlug = category.toLowerCase()
+
+  const { data: categoryRow } = await supabase
+    .from('categories')
+    .select('*')
+    .eq('slug', categorySlug)
+    .single()
+
+  if (!categoryRow) {
+    return { title: 'Category Not Found | LawnMowingNearMe' }
+  }
+
+  const { count } = await supabase
+    .from('businesses')
+    .select('*', { count: 'exact', head: true })
+    .eq('primary_category', categoryRow.name)
+
+  const businessCount = count || 0
+  const title = `${categoryRow.name} Near Me | ${businessCount.toLocaleString()}+ Local Businesses`
+  const description = `Find and compare ${businessCount.toLocaleString()} trusted ${categoryRow.name.toLowerCase()} businesses near you. Read reviews, check ratings, and connect with local professionals across the US and Australia.`
+  const url = `https://www.lawnmowingnearme.org/categories/${categorySlug}`
+
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    robots: { index: businessCount > 0, follow: true },
+    openGraph: { title, description, url, type: 'website' },
+    twitter: { card: 'summary_large_image', title, description },
+  }
+}
+
 
 // Map each category slug to its image in /public/categories/
 const CATEGORY_IMAGES: Record<string, string> = {
@@ -139,6 +176,9 @@ export default async function CategoryPage({ params }: PageProps) {
           <div className="mt-4 text-white/80">
             {results.length.toLocaleString()} businesses found
           </div>
+          <p className="mt-2 text-white/80">
+            Please select your city from the list on the right to view local businesses in this category.
+          </p>
         </div>
       </section>
 
