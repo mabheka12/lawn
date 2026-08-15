@@ -231,7 +231,98 @@ export default function Navbar() {
              <CirclePlus size={18} className="inline-block ml-1" /> Add Listing 
             </Link>
           </div>
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="md:hidden p-2 text-gray-700 hover:text-green-600"
+            aria-label="Toggle menu"
+            aria-expanded={isMenuOpen}
+          >
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
+        {/* Mobile Menu Panel */}
+{isMenuOpen && (
+  <div className="md:hidden border-t border-gray-100 py-4 space-y-1">
+    <Link
+      href="/categories"
+      className="block px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-green-600"
+      onClick={() => setIsMenuOpen(false)}
+    >
+      Categories
+    </Link>
+    <Link
+      href="/type/mowing"
+      className="block px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-green-600"
+      onClick={() => setIsMenuOpen(false)}
+    >
+      🌿 Lawn Mowing
+    </Link>
+    <Link
+      href="/type/repairs"
+      className="block px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-green-600"
+      onClick={() => setIsMenuOpen(false)}
+    >
+      🔧 Repairs
+    </Link>
+    <Link
+      href="/near-me"
+      className="block px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-green-600"
+      onClick={() => setIsMenuOpen(false)}
+    >
+      Near Me
+    </Link>
+    <Link
+      href="/about"
+      className="block px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-green-600"
+      onClick={() => setIsMenuOpen(false)}
+    >
+      About
+    </Link>
+    <Link
+      href="/contact"
+      className="block px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-green-600"
+      onClick={() => setIsMenuOpen(false)}
+    >
+      Contact
+    </Link>
+    <Link
+      href="/blog"
+      className="block px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-green-600"
+      onClick={() => setIsMenuOpen(false)}
+    >
+      Blog
+    </Link>
+
+    <div className="px-3 pt-2">
+      <input
+        type="text"
+        placeholder="Search city..."
+        className="w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            const city = (e.target as HTMLInputElement).value
+            if (city) {
+              router.push(`/near-me/${encodeURIComponent(city.replace(/ /g, '-'))}`)
+              ;(e.target as HTMLInputElement).value = ''
+              setIsMenuOpen(false)
+            }
+          }
+        }}
+      />
+    </div>
+
+    <div className="px-3 pt-2">
+      <Link
+        href="/add-listing"
+        className="block text-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+        onClick={() => setIsMenuOpen(false)}
+      >
+        <CirclePlus size={18} className="inline-block mr-1" /> Add Listing
+      </Link>
+    </div>
+  </div>
+)}
       </div>
     </nav>
   )

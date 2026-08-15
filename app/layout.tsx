@@ -4,7 +4,7 @@ import { Navbar, Footer } from '@/components'
 import './globals.css'
 import Script from "next/script";
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'], display: 'swap' })
 
 
 export const metadata: Metadata = {
@@ -55,10 +55,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-         <script
+         <Script
             async
             src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6988145475779418"
             crossOrigin="anonymous"
+            strategy="afterInteractive"
           />
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-HS88FYGGK6"
