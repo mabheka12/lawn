@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { Navbar, Footer } from '@/components'
+import PromoRibbon from '@/components/PromoRibbon'
 import './globals.css'
 import Script from "next/script";
 
@@ -90,7 +91,8 @@ export default function RootLayout({
           />
    
       </head>
-      <body className={inter.className}>     
+      <body className={inter.className}>    
+        <PromoRibbon /> 
         
         {/* Global Navbar */}
         <Navbar />        
