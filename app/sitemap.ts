@@ -1,3 +1,4 @@
+import { lawnProducts, lawnCategories } from '@/data/lawn-products'
 import { createClient } from '@/utils/supabase/server'
 import { MetadataRoute } from 'next'
 
@@ -194,6 +195,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: 'weekly' as const,
     priority: 0.5
   }))
+//product pages
+const productUrls = lawnProducts.map(product => ({
+  url: `${baseUrl}/lawn-products/product/${product.slug}`,
+  lastModified: new Date(),
+  changeFrequency: 'weekly' as const,
+  priority: 0.8
+}))
+
+const categoryUrls = lawnCategories.map(category => ({
+  url: `${baseUrl}/lawn-products/category/${category.slug}`,
+  lastModified: new Date(),
+  changeFrequency: 'weekly' as const,
+  priority: 0.8
+}))
 
   // ----------------------------------------
   // FINAL OUTPUT
@@ -206,6 +221,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...categoryCityRoutes,
     ...serviceCityRoutes,
     ...blogRoutes,
+    ...productUrls,
+    ...categoryUrls
   ]
 
   return allRoutes
