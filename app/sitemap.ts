@@ -1,229 +1,589 @@
-import { lawnProducts, lawnCategories } from '@/data/lawn-products'
-import { createClient } from '@/utils/supabase/server'
+// app/sitemap.ts
+
 import { MetadataRoute } from 'next'
+import { createClient } from '@/utils/supabase/server'
+import {
+  lawnProducts,
+  lawnCategories,
+} from '@/data/lawn-products'
+
+const baseUrl = 'https://www.lawnmowingnearme.org'
+
+const cityServices = [
+  {
+    slug: 'lawn-care',
+    primaryCategory: 'Lawn Care',
+  },
+  {
+    slug: 'landscaping',
+    primaryCategory: 'Landscaping',
+  },
+  {
+    slug: 'garden-design',
+    primaryCategory: 'Garden Design',
+  },
+  {
+    slug: 'tree-services',
+    primaryCategory: 'Tree Services',
+  },
+  {
+    slug: 'hardscaping',
+    primaryCategory: 'Hardscaping',
+  },
+  {
+    slug: 'mower-repair',
+    listingType: 'repairs',
+  },
+]
+
+type SitemapBusiness = {
+  slug: string | null
+  created_at: string | null
+  city: string | null
+  city_slug: string | null
+  state: string | null
+  state_slug: string | null
+  country: string | null
+  country_slug: string | null
+  primary_category: string | null
+  listing_type: string | null
+  status: string | null
+}
+
+/**
+ * Safely create a sitemap date.
+ * Prevents invalid sitemap <lastmod> values.
+ */
+function safeDate(value?: string | null): Date {
+  if (!value) {
+    return new Date()
+  }
+
+  const date = new Date(value)
+
+  return Number.isNaN(date.getTime())
+    ? new Date()
+    : date
+}
+
+/**
+ * Fetch every approved business.
+ *
+ * Supabase commonly limits a query to 1000 rows,
+ * so location pages MUST be paginated here.
+ */
+async function fetchAllApprovedBusinesses(
+  supabase: any
+): Promise<SitemapBusiness[]> {
+  const pageSize = 1000
+  let from = 0
+  const allBusinesses: SitemapBusiness[] = []
+
+  while (true) {
+    const { data, error } = await supabase
+      .from('businesses')
+      .select(`
+        slug,
+        created_at,
+        city,
+        city_slug,
+        state,
+        state_slug,
+        country,
+        country_slug,
+        primary_category,
+        listing_type,
+        status
+      `)
+      .eq('status', 'approved')
+      .range(from, from + pageSize - 1)
+
+    if (error) {
+      console.error(
+        'Sitemap business fetch error:',
+        error
+      )
+      break
+    }
+
+    if (!data || data.length === 0) {
+      break
+    }
+
+    allBusinesses.push(...data)
+
+    if (data.length < pageSize) {
+      break
+    }
+
+    from += pageSize
+  }
+
+  return allBusinesses
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = await createClient()
-  const baseUrl = 'https://www.lawnmowingnearme.org'
 
-  // ----------------------------------------
-  // 1. STATIC PAGES (always index)
-  // ----------------------------------------
-  const staticRoutes = [
-    { path: '/', priority: 1 },
-    { path: '/categories', priority: 0.9 },
-    { path: '/near-me', priority: 0.9 },
-    { path: '/lawn-care', priority: 0.9 },
-    { path: '/mower-repair', priority: 0.9 },
-    { path: '/locations', priority: 0.9 },
-    { path: '/about', priority: 0.5 },
-    { path: '/contact', priority: 0.5 },
-  ].map(({ path, priority }) => ({
-    url: `${baseUrl}${path}`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly' as const,
-    priority
-  }))
+  // ====================================================
+  // 1. STATIC PAGES
+  // ====================================================
 
-  // ----------------------------------------
-  // 2. BUSINESSES (all indexable)
-  // ----------------------------------------
-  async function fetchAllBusinesses(supabase: any) {
-    const pageSize = 1000
-    let from = 0
-    let all: any[] = []
+  const staticRoutes: MetadataRoute.Sitemap = [
+    {
+      url: `${baseUrl}/`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 1,
+    },
+    {
+      url: `${baseUrl}/near-me`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/categories`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/lawn-care`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/mower-repair`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/locations`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/blog`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/lawn-products`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/about`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.5,
+    },
+    {
+      url: `${baseUrl}/contact`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.5,
+    },
+  ]
 
-    while (true) {
-      const { data, error } = await supabase
-        .from('businesses')
-        .select('slug, created_at, name')
-        .range(from, from + pageSize - 1)
+  // ====================================================
+  // 2. LOAD ALL APPROVED BUSINESSES ONCE
+  // ====================================================
 
-      if (error) {
-        console.error(error)
-        break
-      }
+  const businesses =
+    await fetchAllApprovedBusinesses(supabase)
 
-      if (!data || data.length === 0) break
+  // ====================================================
+  // 3. INDIVIDUAL BUSINESS LISTINGS
+  // ====================================================
 
-      all = all.concat(data)
+  const businessRoutes: MetadataRoute.Sitemap =
+    businesses
+      .filter(
+        (
+          business
+        ): business is SitemapBusiness & {
+          slug: string
+        } => Boolean(business.slug)
+      )
+      .map((business) => ({
+        url: `${baseUrl}/listings/${business.slug}`,
+        lastModified: safeDate(
+          business.created_at
+        ),
+        changeFrequency:
+          'weekly' as const,
+        priority: 0.7,
+      }))
 
-      if (data.length < pageSize) break
+  // ====================================================
+  // 4. CATEGORY PAGES
+  // ====================================================
 
-      from += pageSize
-    }
-
-    return all
-  }
-
-  const businesses = await fetchAllBusinesses(supabase)
-
-  const businessRoutes =
-    (businesses || []).map(b => ({
-      url: `${baseUrl}/listings/${b.slug}`,
-      lastModified: new Date(b.created_at),
-      changeFrequency: 'weekly' as const,
-      priority: 0.7
-    }))
-
-  // ----------------------------------------
-  // 3. CATEGORIES
-  // ----------------------------------------
   const { data: categories } = await supabase
     .from('categories')
     .select('slug, name')
 
-  const categoryRoutes =
-    (categories || []).map(c => ({
-      url: `${baseUrl}/categories/${c.slug}`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.9
-    }))
-
-  const slugLookup = new Map<string, string>()
-  ;(categories || []).forEach(c => {
-    if (c.name && c.slug) {
-      slugLookup.set(c.name, c.slug)
-    }
-  })
-
-  // ----------------------------------------
-  // 4. CITIES (FILTERED = IMPORTANT FIX)
-  // Only cities with 3+ businesses
-  // ----------------------------------------
-  const { data: cityData } = await supabase
-    .from('businesses')
-    .select('city, city_slug')
-
-  const cityCountMap = new Map<string, number>()
-
-  cityData?.forEach(b => {
-    if (!b.city_slug) return
-    cityCountMap.set(
-      b.city_slug,
-      (cityCountMap.get(b.city_slug) || 0) + 1
-    )
-  })
-
-  const cityRoutes = Array.from(cityCountMap.entries())
-    .filter(([_, count]) => count >= 3)
-    .map(([citySlug]) => ({
-      url: `${baseUrl}/near-me/${citySlug}`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.7
-    }))
-
-  // ----------------------------------------
-  // 5. CATEGORY × CITY (CONTROLLED SCALE)
-  // Only include combinations with 2+ businesses
-  // ----------------------------------------
-  const { data: comboData } = await supabase
-    .from('businesses')
-    .select('primary_category, city_slug')
-
-  const comboMap = new Map<string, number>()
-
-  comboData?.forEach(b => {
-    if (!b.primary_category || !b.city_slug) return
-
-    const key = `${b.primary_category}__${b.city_slug}`
-    comboMap.set(key, (comboMap.get(key) || 0) + 1)
-  })
-
-  const categoryCityRoutes = Array.from(comboMap.entries())
-    .filter(([_, count]) => count >= 2)
-    .map(([key]) => {
-      const [categoryName, citySlug] = key.split('__')
-      const categorySlug = slugLookup.get(categoryName)
-
-      if (!categorySlug) return null
-
-      return {
-        url: `${baseUrl}/categories/${categorySlug}/${citySlug}`,
+  const categoryRoutes: MetadataRoute.Sitemap =
+    (categories || [])
+      .filter((category) => category.slug)
+      .map((category) => ({
+        url: `${baseUrl}/categories/${category.slug}`,
         lastModified: new Date(),
-        priority: 0.6,
-        changeFrequency: 'weekly' as const
-      }
-    })
-    .filter((route): route is {
-      url: string
-      lastModified: Date
-      priority: number
-      changeFrequency: 'weekly'
-    } => Boolean(route))
+        changeFrequency:
+          'weekly' as const,
+        priority: 0.8,
+      }))
 
-  // ----------------------------------------
-  // 6. SERVICE × CITY (lawn-care / mower-repair hub pages)
-  // ----------------------------------------
-  const { data: serviceCityData } = await supabase
-    .from('businesses')
-    .select('listing_type, city_slug')
+  // ====================================================
+  // 5. COUNTRY HUBS
+  //
+  // /near-me/united-states
+  // /near-me/australia
+  // ====================================================
 
-  const serviceCityMap = new Map<string, number>()
-  serviceCityData?.forEach(b => {
-    if (!b.listing_type || !b.city_slug) return
-    const key = `${b.listing_type}__${b.city_slug}`
-    serviceCityMap.set(key, (serviceCityMap.get(key) || 0) + 1)
-  })
+  const countryMap = new Map<
+    string,
+    {
+      count: number
+    }
+  >()
 
-  const listingTypeToSlug: Record<string, string> = {
-    mowing: 'lawn-care',
-    repairs: 'mower-repair',
+  for (const business of businesses) {
+    if (!business.country_slug) {
+      continue
+    }
+
+    const existing = countryMap.get(
+      business.country_slug
+    )
+
+    if (existing) {
+      existing.count++
+    } else {
+      countryMap.set(
+        business.country_slug,
+        {
+          count: 1,
+        }
+      )
+    }
   }
 
-  const serviceCityRoutes = Array.from(serviceCityMap.entries()).map(([key]) => {
-    const [listingType, citySlug] = key.split('__')
-    const serviceSlug = listingTypeToSlug[listingType]
-    if (!serviceSlug) return null
-    return {
-      url: `${baseUrl}/${serviceSlug}/${citySlug}`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.75,
+  const countryRoutes: MetadataRoute.Sitemap =
+    Array.from(countryMap.entries()).map(
+      ([countrySlug]) => ({
+        url: `${baseUrl}/near-me/${countrySlug}`,
+        lastModified: new Date(),
+        changeFrequency:
+          'weekly' as const,
+        priority: 0.9,
+      })
+    )
+
+  // ====================================================
+  // 6. STATE / REGION HUBS
+  //
+  // /near-me/united-states/texas
+  // /near-me/australia/victoria
+  // ====================================================
+
+  const stateMap = new Map<
+    string,
+    {
+      countrySlug: string
+      stateSlug: string
+      count: number
     }
-  }).filter((r): r is NonNullable<typeof r> => Boolean(r))
+  >()
+
+  for (const business of businesses) {
+    if (
+      !business.country_slug ||
+      !business.state_slug
+    ) {
+      continue
+    }
+
+    const key =
+      `${business.country_slug}__${business.state_slug}`
+
+    const existing = stateMap.get(key)
+
+    if (existing) {
+      existing.count++
+    } else {
+      stateMap.set(key, {
+        countrySlug:
+          business.country_slug,
+        stateSlug:
+          business.state_slug,
+        count: 1,
+      })
+    }
+  }
+
+  const stateRoutes: MetadataRoute.Sitemap =
+    Array.from(stateMap.values()).map(
+      (state) => ({
+        url:
+          `${baseUrl}/near-me/` +
+          `${state.countrySlug}/` +
+          `${state.stateSlug}`,
+        lastModified: new Date(),
+        changeFrequency:
+          'weekly' as const,
+        priority: 0.85,
+      })
+    )
+
+  // ====================================================
+  // 7. CANONICAL CITY PAGES
+  //
+  // IMPORTANT:
+  // country + state + city is the location identity.
+  //
+  // Only index locations with >= 3 approved businesses.
+  // ====================================================
+
+  const cityMap = new Map<
+    string,
+    {
+      countrySlug: string
+      stateSlug: string
+      citySlug: string
+      count: number
+    }
+  >()
+
+  for (const business of businesses) {
+    if (
+      !business.country_slug ||
+      !business.state_slug ||
+      !business.city_slug
+    ) {
+      continue
+    }
+
+    const key = [
+      business.country_slug,
+      business.state_slug,
+      business.city_slug,
+    ].join('__')
+
+    const existing = cityMap.get(key)
+
+    if (existing) {
+      existing.count++
+    } else {
+      cityMap.set(key, {
+        countrySlug:
+          business.country_slug,
+        stateSlug:
+          business.state_slug,
+        citySlug:
+          business.city_slug,
+        count: 1,
+      })
+    }
+  }
+
+  const cityRoutes: MetadataRoute.Sitemap =
+    Array.from(cityMap.values())
+      .filter((city) => city.count >= 3)
+      .map((city) => ({
+        url:
+          `${baseUrl}/near-me/` +
+          `${city.countrySlug}/` +
+          `${city.stateSlug}/` +
+          `${city.citySlug}`,
+        lastModified: new Date(),
+        changeFrequency:
+          'weekly' as const,
+        priority: 0.8,
+      }))
+
+  // ----------------------------------------
+// CITY × SERVICE PAGES
+//
+// Only index service/location combinations
+// with 3+ approved businesses.
+//
+// Examples:
+// /near-me/united-states/texas/dallas/lawn-care
+// /near-me/united-states/missouri/kansas-city/mower-repair
+// ----------------------------------------
+
+const serviceLocationMap = new Map<
+  string,
+  {
+    countrySlug: string
+    stateSlug: string
+    citySlug: string
+    serviceSlug: string
+    count: number
+  }
+>()
+
+for (const business of businesses || []) {
+  if (
+    !business.country_slug ||
+    !business.state_slug ||
+    !business.city_slug
+  ) {
+    continue
+  }
+
+  for (const service of cityServices) {
+    let matches = false
+
+    if (service.primaryCategory) {
+      matches =
+        business.primary_category ===
+        service.primaryCategory
+    }
+
+    if (service.listingType) {
+      matches =
+        business.listing_type ===
+        service.listingType
+    }
+
+    if (!matches) {
+      continue
+    }
+
+    const key = [
+      business.country_slug,
+      business.state_slug,
+      business.city_slug,
+      service.slug,
+    ].join('__')
+
+    const existing =
+      serviceLocationMap.get(key)
+
+    if (existing) {
+      existing.count++
+    } else {
+      serviceLocationMap.set(key, {
+        countrySlug:
+          business.country_slug,
+
+        stateSlug:
+          business.state_slug,
+
+        citySlug:
+          business.city_slug,
+
+        serviceSlug:
+          service.slug,
+
+        count: 1,
+      })
+    }
+  }
+}
+
+const serviceCityRoutes =
+  Array.from(
+    serviceLocationMap.values()
+  )
+    .filter(
+      (location) =>
+        location.count >= 3
+    )
+    .map((location) => ({
+      url:
+        `${baseUrl}/near-me/` +
+        `${location.countrySlug}/` +
+        `${location.stateSlug}/` +
+        `${location.citySlug}/` +
+        `${location.serviceSlug}`,
+
+      lastModified: new Date(),
+
+      changeFrequency:
+        'weekly' as const,
+
+      priority: 0.7,
+    }))
+
+  // ====================================================
+  // 8. BLOG POSTS
+  // ====================================================
 
   const { data: blogData } = await supabase
     .from('blog_posts')
     .select('slug, created_at')
 
-  const blogRoutes = (blogData || []).map(b => ({
-    url: `${baseUrl}/blog/${b.slug}`,
-    lastModified: new Date(b.created_at),
-    changeFrequency: 'weekly' as const,
-    priority: 0.5
-  }))
-//product pages
-const productUrls = lawnProducts.map(product => ({
-  url: `${baseUrl}/lawn-products/product/${product.slug}`,
-  lastModified: new Date(),
-  changeFrequency: 'weekly' as const,
-  priority: 0.8
-}))
+  const blogRoutes: MetadataRoute.Sitemap =
+    (blogData || [])
+      .filter((post) => post.slug)
+      .map((post) => ({
+        url: `${baseUrl}/blog/${post.slug}`,
+        lastModified: safeDate(
+          post.created_at
+        ),
+        changeFrequency:
+          'monthly' as const,
+        priority: 0.6,
+      }))
 
-const categoryUrls = lawnCategories.map(category => ({
-  url: `${baseUrl}/lawn-products/category/${category.slug}`,
-  lastModified: new Date(),
-  changeFrequency: 'weekly' as const,
-  priority: 0.8
-}))
+  // ====================================================
+  // 9. LAWN PRODUCT PAGES
+  // ====================================================
 
-  // ----------------------------------------
-  // FINAL OUTPUT
-  // ----------------------------------------
-  const allRoutes = [
+  const productRoutes: MetadataRoute.Sitemap =
+    lawnProducts.map((product) => ({
+      url:
+        `${baseUrl}/lawn-products/product/` +
+        `${product.slug}`,
+      lastModified: new Date(),
+      changeFrequency:
+        'weekly' as const,
+      priority: 0.7,
+    }))
+
+  // ====================================================
+  // 10. LAWN PRODUCT CATEGORY PAGES
+  // ====================================================
+
+  const productCategoryRoutes: MetadataRoute.Sitemap =
+    lawnCategories.map((category) => ({
+      url:
+        `${baseUrl}/lawn-products/category/` +
+        `${category.slug}`,
+      lastModified: new Date(),
+      changeFrequency:
+        'weekly' as const,
+      priority: 0.7,
+    }))
+
+  // ====================================================
+  // FINAL
+  // ====================================================
+
+  return [
     ...staticRoutes,
-    ...businessRoutes,
-    ...categoryRoutes,
-    ...cityRoutes,
-    ...categoryCityRoutes,
-    ...serviceCityRoutes,
-    ...blogRoutes,
-    ...productUrls,
-    ...categoryUrls
-  ]
 
-  return allRoutes
-}
+    ...countryRoutes,
+    ...stateRoutes,
+    ...cityRoutes,
+
+    ...categoryRoutes,
+    ...businessRoutes,
+
+    ...blogRoutes,
+
+    ...productRoutes,
+    ...productCategoryRoutes,
+    ...serviceCityRoutes
+  ]
+} 

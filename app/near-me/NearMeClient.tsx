@@ -121,16 +121,16 @@ export default async function NearMePage({ params, searchParams }: PageProps) {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar - Now using Client Component for filters */}
           <div className="lg:w-1/4">
-            <NearMeFilters
-              citySlug={citySlug}
-              city={city}
-              categoriesInCity={categoriesInCity}
-              totalBusinesses={totalBusinesses}
-              avgRating={avgRating}
-              selectedCategory={selectedCategory}
-              selectedRating={selectedRating}
-              sortBy={sortBy}
-            />
+          <NearMeFilters
+            basePath={`/near-me/${citySlug}`}
+            city={city}
+            categoriesInCity={categoriesInCity}
+            totalBusinesses={totalBusinesses}
+            avgRating={avgRating}
+            selectedCategory={selectedCategory}
+            selectedRating={selectedRating}
+            sortBy={sortBy}
+          />
           </div>
 
           {/* Main Content */}

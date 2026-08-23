@@ -45,7 +45,7 @@ export function generateCategoryCityIntro({
   const closers = [
     `Check each listing for service areas, reviews, and contact info before reaching out — it'll save you a round of phone tag.`,
     `We recommend comparing at least two or three providers to find the best fit for your budget and timeline.`,
-    `Ratings and review counts are pulled from verified customer feedback, so you can shortlist with confidence.`,
+    `Ratings and review counts are pulled from verified customer feedback where available, otherwise are outsourced from third-party sources, so you can shortlist with confidence.`,
     `Most businesses below respond to inquiries within a day or two — worth reaching out to a few before deciding.`,
   ]
 

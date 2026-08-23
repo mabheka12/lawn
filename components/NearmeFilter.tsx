@@ -5,7 +5,7 @@ import { Filter, X, Award } from 'lucide-react'
 import { useCallback } from 'react'
 
 interface NearMeFiltersProps {
-  citySlug: string
+  basePath: string
   city: string
   categoriesInCity: string[]
   totalBusinesses: number
@@ -16,7 +16,7 @@ interface NearMeFiltersProps {
 }
 
 export default function NearMeFilters({
-  citySlug,
+  basePath,
   city,
   categoriesInCity,
   totalBusinesses,
@@ -57,7 +57,7 @@ export default function NearMeFilters({
   }
 
   const clearAllFilters = () => {
-    router.push(`/near-me/${citySlug}`)
+    router.push(basePath)
   }
 
   const clearFilter = (key: string) => {

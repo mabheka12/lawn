@@ -248,7 +248,7 @@ export default function CityContent({
       icon: Award,
       title: `Average Rating: ${avgRating > 0 ? avgRating.toFixed(1) : 'N/A'}`,
       description: avgRating > 0 
-        ? `${cityName} lawn mower professionals maintain a strong average rating of ${avgRating.toFixed(1)} stars. Our verified reviews ensure you get the best service.`
+        ? `${cityName} lawn mower professionals maintain a strong average rating of ${avgRating.toFixed(1)} stars. The reviews whether outsourced or user-generated ensure you get the best service.`
         : `Help establish ${cityName}'s lawn mower rating system by leaving reviews for services you've used.`
     },
     {
