@@ -10,7 +10,7 @@ const inter = Inter({ subsets: ['latin'], display: 'swap' })
 
 export const metadata: Metadata = {
   title: 'Lawn Care & Mower Repair Near Me | Find Local Services',
-  description: 'Find trusted lawn care, lawn mowing, and lawn mower repair services near you. Compare ratings, read reviews, and connect with local specialists.',
+  description: 'Find lawn care, lawn mowing, and lawn mower repair services near you. Compare ratings, read reviews, and connect with local specialists.',
   keywords: 'lawn care near me, lawn mower repair near me, lawn mowing service near me, lawn maintenance near me, lawnmower repair',
   authors: [{ name: 'LawnMowerDir' }],
   openGraph: {
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Lawn Mowing Near Me',
-    description: 'Find the best lawn mower services near you',
+    description: 'Find lawn mower services near you',
     images: ['/twitter-image.jpg'],
   },
   robots: {

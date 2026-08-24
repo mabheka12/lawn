@@ -5,18 +5,19 @@ import {
   CheckCircle,
   Send,
 } from 'lucide-react'
+import {
+  trackQuoteSubmitted,
+} from '@/lib/analytics'
 
 interface RequestQuoteFormProps {
   city?: string
   state?: string
   country?: string
-
   service?: string
-
   businessId?: number
   businessName?: string
-
   sourcePage?: string
+  title?: string
 }
 
 const SERVICES = [
@@ -112,6 +113,17 @@ export default function RequestQuoteForm({
 
         return
       }
+
+      trackQuoteSubmitted({
+        service: form.service,
+        city: form.city,
+        state: form.state,
+        country: form.country,
+        business_id: businessId,
+        source_page:
+          sourcePage ||
+          window.location.pathname,
+      })
 
       setSuccess(true)
 
