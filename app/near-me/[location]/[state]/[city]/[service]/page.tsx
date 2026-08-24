@@ -15,7 +15,7 @@ interface PageProps {
     location: string
     state: string
     city: string
-    service: string
+    service: string   
   }>
 
   searchParams: Promise<{
@@ -27,22 +27,9 @@ type ServiceDefinition = {
   slug: string
   label: string
   description: string
-
-  // Either filter by primary_category
-  // or by listing_type.
   primaryCategories?: string[]
   listingTypes?: string[]
 }
-
-/**
- * IMPORTANT:
- *
- * These values must match the actual values stored
- * in businesses.primary_category and listing_type.
- *
- * We can expand this after checking the category
- * distribution in the DB.
- */
 const services: Record<string, ServiceDefinition> = {
   'lawn-care': {
     slug: 'lawn-care',
@@ -124,12 +111,10 @@ function parseRating(
   ) {
     return 0
   }
-
   const parsed =
     typeof rating === 'number'
       ? rating
       : parseFloat(rating)
-
   return Number.isNaN(parsed)
     ? 0
     : parsed
@@ -239,10 +224,6 @@ export async function generateMetadata({
   const canonical =
     `/near-me/${location.country_slug}/${location.state_slug}/${location.city_slug}/${service.slug}`
 
-  /**
-   * We allow the page to exist with 1-2 businesses,
-   * but only index it once it has 3+.
-   */
   const shouldIndex =
     (count || 0) >= 3
 
@@ -373,10 +354,6 @@ export default async function ServiceCityPage({
 
     notFound()
   }
-
-  /**
-   * We don't create empty service pages.
-   */
   if (
     !serviceBusinesses ||
     serviceBusinesses.length === 0
@@ -595,7 +572,6 @@ export default async function ServiceCityPage({
               <p className="text-xl text-white/90 mt-4 max-w-3xl">
                 {service.description}
               </p>
-
             </div>
 
             <div className="bg-white/20 backdrop-blur rounded-xl p-5 min-w-[210px]">
@@ -859,26 +835,19 @@ export default async function ServiceCityPage({
                     />
                   )
                 )}
-
               </div>
-
             ) : (
-
               <div className="border rounded-xl p-10 text-center bg-white">
-
                 <MapPin
                   size={38}
                   className="text-green-600 mx-auto mb-4"
                 />
-
                 <h2 className="text-xl font-bold">
                   No matching businesses
                 </h2>
-
                 <p className="text-gray-500 mt-2">
                   Try removing your filters.
                 </p>
-
                 <Link
                   href={basePath}
                   className="inline-block mt-5 bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700"
@@ -889,6 +858,10 @@ export default async function ServiceCityPage({
             )}
 
             {/* REQUEST A QUOTE */}
+            <div
+              id="request-quote"
+              className="mt-10 scroll-mt-24"
+            >
               <RequestQuoteForm
                 city={city}
                 state={state}
@@ -896,6 +869,7 @@ export default async function ServiceCityPage({
                 service={service.label}
                 sourcePage={basePath}
               />
+            </div>
           </section>
         </div>
       </main>

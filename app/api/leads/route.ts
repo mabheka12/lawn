@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/utils/supabase/admin'
+import { notifyAdminNewLead } from '@/lib/email'
 
 const ALLOWED_SERVICES = [
   'Lawn Care',
@@ -159,6 +160,26 @@ export async function POST(req: Request) {
         { status: 500 }
       )
     }
+
+    try {
+  await notifyAdminNewLead({
+    leadId: data.id,
+    name,
+    email,
+    phone,
+    service,
+    city,
+    state,
+    country,
+    message,
+    sourcePage,
+  })
+} catch (emailError) {
+  console.error(
+    'New lead notification failed:',
+    emailError
+  )
+}
 
     return NextResponse.json(
       {

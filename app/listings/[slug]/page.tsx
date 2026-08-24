@@ -16,6 +16,7 @@ import {
 
 import MapWrapper from '@/components/MapWrapper'
 import WeatherWidget from '@/components/WeatherWidget'
+import RequestQuoteForm from '@/components/leads/RequestQuoteForm'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -905,8 +906,9 @@ export default async function ListingPage({
                   </Link>
                 </section>
               )}
+
             </main>
-            {/* ============================ */}
+          {/* ============================ */}
             {/* SIDEBAR */}
             {/* ============================ */}
             <aside className="space-y-6">
@@ -1021,6 +1023,16 @@ export default async function ListingPage({
                   </section>
                 )}
             </aside>
+             {/* REQUEST A QUOTE */}
+                        <div
+                          id="request-quote"
+                          className="mt-10 scroll-mt-24"
+                        >
+                          <RequestQuoteForm
+                            businessId={business.id}
+                            businessName={business.name}
+                          />
+                        </div>
           </div>
         </div>
       </div>
