@@ -77,6 +77,8 @@ export async function generateMetadata({
   }
 }
 
+export const revalidate = 3600;
+
 export default async function StatePage({
   params,
 }: PageProps) {

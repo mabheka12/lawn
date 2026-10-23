@@ -2,12 +2,23 @@ import { createClient } from '@/utils/supabase/server'
 import SearchBar from '@/components/Searchbar'
 import ListingCard from '@/components/ListingCard'
 import Link from 'next/link'
-import {
-  Wrench,
-  Star,
-  Award,
-  Sprout,
-} from 'lucide-react'
+import {  Star,  Award,  Flower2,  Trees,  TreePine,  Sprout,  Layers,  Hammer,  Wrench,} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+
+const categoryIcons: Record<string, LucideIcon> = {
+  'garden-design': Flower2,
+  landscaping: Trees,
+  'tree-services': TreePine,
+  'lawn-care': Sprout,
+  'turf-installation': Layers,
+  hardscaping: Hammer,
+  repairs: Wrench,
+};
+
+function getCategoryIcon(slug: string): LucideIcon {
+  return categoryIcons[slug] ?? Wrench;
+}
+
 
 async function getFeaturedOrTop(supabase: any, listingType: string, limit: number) {
   const { data: featured } = await supabase
@@ -39,6 +50,8 @@ async function getFeaturedOrTop(supabase: any, listingType: string, limit: numbe
 
   return { listings: [...results, ...(fallback ?? [])], featuredCount: results.length }
 }
+
+export const revalidate = 3600;
 
 export default async function HomePage() {
   const supabase = await createClient()
@@ -175,35 +188,51 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
+        
+{/* CATEGORIES */}
+<section className="container mx-auto px-4 py-16">
+  <div className="mb-8 flex items-center justify-between gap-4">
+    <h2 className="text-2xl font-bold md:text-3xl">
+      Browse Categories
+    </h2>
 
-        {/* CATEGORIES */}
-        <section className="py-16 container mx-auto px-4">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold">Browse Categories</h2>
-            <Link href="/categories" className="text-green-600 hover:underline">
-              View All →
-            </Link>
+    <Link
+      href="/categories"
+      className="shrink-0 text-green-600 hover:underline"
+    >
+      View All →
+    </Link>
+  </div>
+
+  <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+    {categories?.map((category) => {
+      const CategoryIcon = getCategoryIcon(category.slug);
+
+      return (
+        <Link
+          key={category.id}
+          href={`/categories/${category.slug}`}
+          className="group rounded-xl border border-gray-100 bg-white p-5 text-center shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-green-200 hover:shadow-lg md:p-6"
+        >
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-50 text-green-600 transition-colors group-hover:bg-green-600 group-hover:text-white">
+            <CategoryIcon size={28} strokeWidth={1.8} />
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {categories?.map((category) => (
-              <Link
-                key={category.id}
-                href={`/categories/${category.slug}`}
-                className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition text-center group"
-              >
-                <Wrench
-                  className="mx-auto mb-3 text-green-600 group-hover:scale-110 transition"
-                  size={32}
-                />
-                <h3 className="font-semibold">{category.name}</h3>
-                {category.description && (
-                  <p className="text-sm text-gray-500 mt-1">{category.description}</p>
-                )}
-              </Link>
-            ))}
-          </div>
-        </section>
+          <h3 className="font-semibold text-gray-900 transition-colors group-hover:text-green-700">
+            {category.name}
+          </h3>
+
+          {category.description && (
+            <p className="mt-2 line-clamp-2 text-sm text-gray-500">
+              {category.description}
+            </p>
+          )}
+        </Link>
+      );
+    })}
+  </div>
+</section>
+
 
         {/* FEATURED LAWN CARE */}
         <section className="py-16 bg-white">

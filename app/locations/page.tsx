@@ -2,6 +2,8 @@
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 
+export const revalidate = 3600;
+
 export default async function LocationsPage() {
   const supabase = await createClient()
 

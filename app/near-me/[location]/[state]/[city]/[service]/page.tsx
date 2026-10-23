@@ -3,21 +3,9 @@ import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import RelatedLawnProducts from '@/components/products/RelatedLawnProducts'
-import {
-  SERVICE_PRODUCT_CATEGORIES,
-} from '@/lib/service-product-categories'
-
-import {
-  ListingCard,
-  SearchBar,
-} from '@/components'
-
-import {
-  ArrowLeft,
-  MapPin,
-  PlusCircle,
-} from 'lucide-react'
-
+import {  SERVICE_PRODUCT_CATEGORIES } from '@/lib/service-product-categories'
+import {  ListingCard,  SearchBar} from '@/components'
+import {  ArrowLeft,  MapPin,  PlusCircle} from 'lucide-react'
 import RequestQuoteForm from '@/components/leads/RequestQuoteForm'
 import TrackedLink from '@/components/analytics/TrackedLink'
 

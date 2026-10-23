@@ -197,7 +197,7 @@ export async function generateMetadata({
 // ==================================================
 // PAGE
 // ==================================================
-
+export const revalidate = 3600;
 export default async function CityPage({
   params,
   searchParams,

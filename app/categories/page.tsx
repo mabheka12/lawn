@@ -40,6 +40,8 @@ function getCategoryIcon(slug: string) {
   return Wrench
 }
 
+export const revalidate = 3600;
+
 export default async function CategoriesPage() {
   const supabase = await createClient()
 

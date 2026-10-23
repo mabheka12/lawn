@@ -8,17 +8,7 @@ import {
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 
-import {
-  Star,
-  MapPin,
-  Phone,
-  Globe,
-  CheckCircle,
-  Clock,
-  ExternalLink,
-  ShieldCheck,
-  ArrowRight,
-} from 'lucide-react'
+import {  Star,  MapPin,  Phone,  Globe,  CheckCircle,  Clock,  ExternalLink,  ShieldCheck,  ArrowRight} from 'lucide-react'
 
 import MapWrapper from '@/components/MapWrapper'
 import WeatherWidget from '@/components/WeatherWidget'
@@ -229,6 +219,8 @@ export async function generateMetadata({
 // ==================================================
 // PAGE
 // ==================================================
+
+export const revalidate = 3600;
 
 export default async function ListingPage({
   params,
@@ -1435,7 +1427,6 @@ export default async function ListingPage({
                 id="request-quote"
                 className="scroll-mt-24"
               >
-
                 <RequestQuoteForm
                   businessId={
                     business.id
@@ -1501,9 +1492,7 @@ export default async function ListingPage({
                         `, ${business.state}`}
 
                     </p>
-
                   </div>
-
                   <MapWrapper
                     businessName={
                       business.name
@@ -1525,9 +1514,7 @@ export default async function ListingPage({
                       ''
                     }
                   />
-
                 </div>
-
               )}
 
               {/* SIMILAR BUSINESSES */}
@@ -1535,13 +1522,10 @@ export default async function ListingPage({
               {similar &&
                 similar.length >
                   0 && (
-
                   <section className="bg-white border rounded-xl p-5">
-
                     <h2 className="font-bold text-xl mb-1">
                       Similar Businesses
                     </h2>
-
                     <p className="text-sm text-gray-500 mb-5">
 
                       More{' '}

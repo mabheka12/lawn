@@ -20,6 +20,8 @@ function parseRating(rating: string | null): number {
   return isNaN(parsed) ? 0 : parsed
 }
 
+export const revalidate = 3600;
+
 export default async function NearMePage({ params, searchParams }: PageProps) {
   const { city: citySlug } = await params
   const resolvedSearchParams = await searchParams

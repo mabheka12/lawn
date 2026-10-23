@@ -67,6 +67,8 @@ function parseRating(rating: string | null): number {
   return isNaN(parsed) ? 0 : parsed
 }
 
+export const revalidate = 3600;
+
 export default async function CategoryCityPage({ params }: PageProps) {
   const { category, city } = await params
   console.log('🔥 CategoryCityPage rendering for', category, city)
