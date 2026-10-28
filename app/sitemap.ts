@@ -190,6 +190,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.5,
     },
+    {
+      url: `${baseUrl}/lawn-mowing-cost-calculator`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
+  url: `${baseUrl}/us/lawn-mowing-cost-calculator`,
+  lastModified: new Date(),
+  changeFrequency: 'monthly',
+  priority: 0.8,
+},
+{
+  url: `${baseUrl}/au/lawn-mowing-cost-calculator`,
+  lastModified: new Date(),
+  changeFrequency: 'monthly',
+  priority: 0.8,
+},
   ]
 
   // ====================================================
@@ -408,16 +426,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           'weekly' as const,
         priority: 0.8,
       }))
-
-  // ----------------------------------------
-// CITY × SERVICE PAGES
-//
-// Only index service/location combinations
-// with 3+ approved businesses.
-//
-// Examples:
-// /near-me/united-states/texas/dallas/lawn-care
-// /near-me/united-states/missouri/kansas-city/mower-repair
 // ----------------------------------------
 
 const serviceLocationMap = new Map<
@@ -565,6 +573,7 @@ const serviceCityRoutes =
         'weekly' as const,
       priority: 0.7,
     }))
+  
 
   // ====================================================
   // FINAL

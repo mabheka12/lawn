@@ -642,27 +642,21 @@ export default async function CityPage({
       {/* ================================================== */}
       {/* HERO */}
       {/* ================================================== */}
-
       <section className="bg-gradient-to-r from-green-600 to-green-800 text-white py-12">
-
         <div className="container mx-auto px-4">
-
           <nav
             aria-label="Breadcrumb"
             className="flex flex-wrap items-center gap-2 text-sm mb-5"
           >
-
             <Link
               href="/"
               className="text-white/80 hover:text-white"
             >
               Home
             </Link>
-
             <span>
               ›
             </span>
-
             <Link
               href="/near-me"
               className="text-white/80 hover:text-white"
@@ -684,7 +678,6 @@ export default async function CityPage({
             <span>
               ›
             </span>
-
             <Link
               href={`/near-me/${countrySlug}/${stateSlug}`}
               className="text-white/80 hover:text-white"
@@ -699,31 +692,22 @@ export default async function CityPage({
             <span className="font-semibold">
               {city}
             </span>
-
           </nav>
-
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
-
             <div className="max-w-4xl">
-
               <h1 className="text-4xl md:text-5xl font-bold mb-4 flex items-start gap-3">
-
                 <MapPin
                   size={40}
                   className="shrink-0 mt-1"
                 />
-
                 <span>
                   Lawn Care & Mower
                   Services in{' '}
                   {city},{' '}
                   {state}
                 </span>
-
               </h1>
-
               <p className="text-xl text-white/90 max-w-3xl">
-
                 Compare local
                 lawn care,
                 landscaping and
@@ -731,77 +715,53 @@ export default async function CityPage({
                 professionals
                 serving{' '}
                 {city}.
-
               </p>
-
             </div>
-
             <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-3 w-full lg:w-auto">
-
               <div className="bg-white/20 backdrop-blur rounded-xl p-4 min-w-[180px]">
-
                 <div className="text-3xl font-bold">
                   {
                     totalCityBusinesses
                   }
                 </div>
-
                 <div className="text-sm text-white/90">
                   Local Businesses
                 </div>
-
               </div>
-
               <div className="bg-white/20 backdrop-blur rounded-xl p-4 min-w-[180px]">
-
                 <div className="flex items-center gap-2">
-
                   <Star
                     size={22}
                     className="fill-current"
                   />
-
                   <div className="text-3xl font-bold">
-
                     {cityAvgRating >
                     0
                       ? cityAvgRating.toFixed(
                           1
                         )
                       : '—'}
-
                   </div>
-
                 </div>
-
                 <div className="text-sm text-white/90">
                   Average Rating
                 </div>
-
               </div>
-
               <div className="bg-white/20 backdrop-blur rounded-xl p-4 min-w-[180px]">
-
                 <div className="flex items-center gap-2">
-
                   <Layers3
                     size={22}
                   />
-
                   <div className="text-3xl font-bold">
                     {
                       serviceCounts.length
                     }
                   </div>
-
                 </div>
-
                 <div className="text-sm text-white/90">
                   Service Types
                 </div>
-
               </div>
-
             </div>
 
           </div>
@@ -813,11 +773,8 @@ export default async function CityPage({
               state={state}
               country={country}
             />
-
           </div>
-
         </div>
-
       </section>
 
       {/* ================================================== */}
@@ -956,57 +913,38 @@ export default async function CityPage({
                   sortBy
                 }
               />
-
             </div>
-
           </aside>
-
           {/* RESULTS */}
-
           <div className="lg:col-span-2">
-
             <div className="mb-5">
-
               <SearchBar
                 variant="compact"
                 placeholder={`Search lawn services in ${city}...`}
               />
-
             </div>
-
             <div className="bg-white border rounded-xl p-4 mb-5 flex flex-wrap justify-between items-center gap-3">
-
               <p className="text-gray-600 text-sm">
-
                 Showing{' '}
-
                 <span className="font-semibold text-green-600">
                   {
                     businesses.length
                   }
                 </span>{' '}
-
                 {businesses.length ===
                 1
                   ? 'business'
                   : 'businesses'}{' '}
-
                 in{' '}
                 {city},{' '}
                 {state}
-
                 {hasActiveFilters && (
-
                   <span className="text-gray-400 ml-2">
                     (filtered)
                   </span>
-
                 )}
-
               </p>
-
               {hasActiveFilters && (
-
                 <Link
                   href={
                     basePath
@@ -1015,21 +953,17 @@ export default async function CityPage({
                 >
                   Clear all filters
                 </Link>
-
               )}
 
             </div>
 
             {businesses.length >
             0 ? (
-
               <div className="space-y-4">
-
                 {businesses.map(
                   (
                     business
                   ) => (
-
                     <ListingCard
                       key={
                         business.id
@@ -1039,37 +973,25 @@ export default async function CityPage({
                       }
                       variant="default"
                     />
-
                   )
                 )}
-
               </div>
-
             ) : (
-
               <div className="bg-white border rounded-xl p-12 text-center">
-
                 <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-6">
-
                   <MapPin
                     size={40}
                     className="text-green-600"
                   />
-
                 </div>
-
                 <h2 className="text-2xl font-bold mb-3">
                   No matching businesses found
                 </h2>
-
                 <p className="text-gray-500 mb-6">
-
                   No businesses
                   match your current
                   filters.
-
                 </p>
-
                 <Link
                   href={
                     basePath
@@ -1078,27 +1000,17 @@ export default async function CityPage({
                 >
                   Clear Filters
                 </Link>
-
               </div>
-
             )}
-
           </div>
-
         </div>
-
       </section>
-
       {/* ================================================== */}
       {/* CITY CONTENT */}
       {/* ================================================== */}
-
       <section className="bg-gray-50 border-t py-12">
-
         <div className="container mx-auto px-4">
-
           <div className="max-w-4xl">
-
             <CityContent
               city={
                 city
@@ -1113,34 +1025,22 @@ export default async function CityPage({
                 allCategoriesInCity
               }
             />
-
           </div>
-
         </div>
-
       </section>
-
       {/* ================================================== */}
       {/* NEARBY CITIES */}
       {/* ================================================== */}
-
       {nearbyCities.length >
         0 && (
-
         <section className="border-t py-12">
-
           <div className="container mx-auto px-4">
-
             <div className="mb-7">
-
               <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
-
                 More Lawn Services
                 in{' '}
                 {state}
-
               </h2>
-
               <p className="text-gray-600 mt-2">
 
                 Browse lawn and
@@ -1148,18 +1048,13 @@ export default async function CityPage({
                 in other cities
                 across{' '}
                 {state}.
-
               </p>
-
             </div>
-
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-
               {nearbyCities.map(
                 (
                   nearbyCity
                 ) => (
-
                   <Link
                     key={
                       nearbyCity.citySlug
@@ -1167,64 +1062,44 @@ export default async function CityPage({
                     href={`/near-me/${countrySlug}/${stateSlug}/${nearbyCity.citySlug}`}
                     className="bg-white border rounded-xl p-4 hover:shadow-md hover:border-green-300 transition"
                   >
-
                     <div className="font-semibold text-gray-900">
                       {
                         nearbyCity.city
                       }
                     </div>
-
                     <div className="text-sm text-gray-500 mt-1">
-
                       {
                         nearbyCity.count
                       }{' '}
-
                       {nearbyCity.count ===
                       1
                         ? 'business'
                         : 'businesses'}
-
                     </div>
-
                   </Link>
-
                 )
               )}
-
             </div>
-
           </div>
-
         </section>
-
       )}
 
       {/* ================================================== */}
       {/* BUSINESS CTA */}
       {/* ================================================== */}
-
       <section className="bg-green-50 border-t py-12">
-
         <div className="container mx-auto px-4">
-
           <div className="max-w-4xl mx-auto text-center">
-
             <PlusCircle
               size={40}
               className="text-green-600 mx-auto mb-4"
             />
-
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
-
               Own a Lawn or
               Mower Business in{' '}
               {city}?
-
             </h2>
-
             <p className="text-gray-600 mt-3 mb-6 max-w-2xl mx-auto">
-
               Add your business to
               Lawn Mowing Near Me
               and reach customers
@@ -1232,9 +1107,7 @@ export default async function CityPage({
               care, landscaping
               and mower services
               in your area.
-
             </p>
-
             <TrackedLink
               href="/submit-business"
               event="submit-business"
@@ -1249,18 +1122,13 @@ export default async function CityPage({
             >
               Suggest a Business
             </TrackedLink>
-
           </div>
-
         </div>
-
         <div className="container mx-auto px-4 mt-10">
-
           <div
             id="request-quote"
             className="max-w-4xl mx-auto scroll-mt-24"
           >
-
             <RequestQuoteForm
               city={
                 city
@@ -1277,11 +1145,8 @@ export default async function CityPage({
               }
               title={`Request a Lawn Care Quote in ${city}`}
             />
-
           </div>
-
         </div>
-
       </section>
     </>
   )

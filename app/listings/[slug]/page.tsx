@@ -14,23 +14,21 @@ import MapWrapper from '@/components/MapWrapper'
 import WeatherWidget from '@/components/WeatherWidget'
 import RequestQuoteForm from '@/components/leads/RequestQuoteForm'
 import TrackedLink from '@/components/analytics/TrackedLink'
+import CompareButton from '@/components/CompareButton'
 
 interface PageProps {
   params: Promise<{
     slug: string
   }>
 }
-
 type DayHours = {
   open: string | null
   close: string | null
 }
-
 type OpenHours = Record<
   string,
   DayHours
 >
-
 const DAY_ORDER = [
   'monday',
   'tuesday',
@@ -40,7 +38,6 @@ const DAY_ORDER = [
   'saturday',
   'sunday',
 ]
-
 const SERVICE_SLUGS: Record<
   string,
   string
@@ -202,11 +199,9 @@ export async function generateMetadata({
   return {
     title,
     description,
-
     alternates: {
       canonical,
     },
-
     openGraph: {
       title,
       description,
@@ -215,39 +210,32 @@ export async function generateMetadata({
     },
   }
 }
-
 // ==================================================
 // PAGE
 // ==================================================
 
 export const revalidate = 3600;
-
 export default async function ListingPage({
   params,
 }: PageProps) {
   const { slug } =
     await params
-
   const supabase =
     await createClient()
-
   const id =
     Number(
       slug
         .split('-')
         .pop()
     )
-
   if (
     Number.isNaN(id)
   ) {
     notFound()
   }
-
   // ==================================================
   // BUSINESS
   // ==================================================
-
   const {
     data: business,
   } = await supabase
@@ -259,11 +247,9 @@ export default async function ListingPage({
       'approved'
     )
     .single()
-
   if (!business) {
     notFound()
   }
-
   // Canonical slug
   if (
     slug !==
@@ -273,32 +259,27 @@ export default async function ListingPage({
       `/listings/${business.slug}`
     )
   }
-
   const cityPath =
     business.country_slug &&
     business.state_slug &&
     business.city_slug
       ? `/near-me/${business.country_slug}/${business.state_slug}/${business.city_slug}`
       : null
-
   const serviceSlug =
     getServiceSlug(
       business.primary_category,
       business.listing_type
     )
-
   const serviceLabel =
     getServiceLabel(
       business.primary_category,
       business.listing_type
     )
-
   const servicePath =
     cityPath &&
     serviceSlug
       ? `${cityPath}/${serviceSlug}`
       : null
-
   // Common event properties.
   //
   // TrackedLink automatically supplies
@@ -306,27 +287,21 @@ export default async function ListingPage({
   const trackingProperties = {
     business_id:
       business.id,
-
     business_slug:
       business.slug,
-
     city:
       business.city,
-
     state:
       business.state,
 
     country:
       business.country,
-
     service:
       serviceLabel,
   }
-
   // ==================================================
   // SIMILAR BUSINESSES
   // ==================================================
-
   let similarQuery =
     supabase
       .from('businesses')
@@ -349,7 +324,6 @@ export default async function ListingPage({
         'id',
         business.id
       )
-
   if (
     business.country_slug
   ) {
@@ -359,7 +333,6 @@ export default async function ListingPage({
         business.country_slug
       )
   }
-
   if (
     business.state_slug
   ) {
@@ -369,7 +342,6 @@ export default async function ListingPage({
         business.state_slug
       )
   }
-
   if (
     business.city_slug
   ) {
@@ -379,7 +351,6 @@ export default async function ListingPage({
         business.city_slug
       )
   }
-
   if (
     business.listing_type ===
     'repairs'
@@ -398,7 +369,6 @@ export default async function ListingPage({
         business.primary_category
       )
   }
-
   const {
     data: similar,
   } =
@@ -411,27 +381,21 @@ export default async function ListingPage({
         }
       )
       .limit(4)
-
   // ==================================================
   // CLAIM / EDIT STATE
   // ==================================================
-
   const {
     data: {
       user,
     },
   } =
     await supabase.auth.getUser()
-
   let isOwnerOrSubmitter =
     false
-
   let hasPendingEdit =
     false
-
   let hasPendingClaim =
     false
-
   if (user) {
     isOwnerOrSubmitter =
       business.owner_id ===
@@ -444,7 +408,6 @@ export default async function ListingPage({
             ''
           ).toLowerCase()
       )
-
     if (
       isOwnerOrSubmitter
     ) {
@@ -470,7 +433,6 @@ export default async function ListingPage({
             'pending'
           )
           .maybeSingle()
-
       hasPendingEdit =
         !!pendingEdit
     } else if (
@@ -503,16 +465,13 @@ export default async function ListingPage({
         !!pendingClaim
     }
   }
-
   // ==================================================
   // HOURS
   // ==================================================
-
   const openHours =
     business.open_hours as
       | OpenHours
       | null
-
   const hasAnyHours =
     !!openHours &&
     DAY_ORDER.some(
@@ -520,11 +479,9 @@ export default async function ListingPage({
         openHours[day]?.open &&
         openHours[day]?.close
     )
-
   // ==================================================
   // RATING
   // ==================================================
-
   const rating =
     business.rating &&
     Number(
@@ -534,7 +491,6 @@ export default async function ListingPage({
           business.rating
         )
       : null
-
   const reviewCount =
     business.google_reviews_count
       ? parseInt(
@@ -547,95 +503,73 @@ export default async function ListingPage({
           10
         )
       : null
-
   // ==================================================
   // STRUCTURED DATA
   // ==================================================
-
   const businessUrl =
     `https://www.lawnmowingnearme.org/listings/${business.slug}`
-
   const localBusinessSchema = {
     '@context':
       'https://schema.org',
-
     '@type':
       'LocalBusiness',
-
     '@id':
       businessUrl,
-
     name:
       business.name,
-
     url:
       businessUrl,
-
     ...(business.phone && {
       telephone:
         business.phone,
     }),
-
     ...(business.website && {
       sameAs: [
         business.website,
       ],
     }),
-
     ...(business.address && {
       address: {
         '@type':
           'PostalAddress',
-
         streetAddress:
           business.address,
-
         addressLocality:
           business.city ||
           undefined,
-
         addressRegion:
           business.state ||
           undefined,
-
         addressCountry:
           business.country ||
           undefined,
       },
     }),
-
     ...(rating &&
       reviewCount &&
       reviewCount > 0 && {
         aggregateRating: {
           '@type':
             'AggregateRating',
-
           ratingValue:
             rating,
-
           reviewCount,
         },
       }),
   }
-
   const breadcrumbItems = [
     {
       name:
         'Home',
-
       url:
         'https://www.lawnmowingnearme.org',
     },
-
     {
       name:
         'Near Me',
-
       url:
         'https://www.lawnmowingnearme.org/near-me',
     },
-
     ...(business.country_slug
       ? [
           {
@@ -647,48 +581,39 @@ export default async function ListingPage({
           },
         ]
       : []),
-
     ...(business.country_slug &&
     business.state_slug
       ? [
           {
             name:
               business.state,
-
             url:
               `https://www.lawnmowingnearme.org/near-me/${business.country_slug}/${business.state_slug}`,
           },
         ]
       : []),
-
     ...(cityPath
       ? [
           {
             name:
               business.city,
-
             url:
               `https://www.lawnmowingnearme.org${cityPath}`,
           },
         ]
       : []),
-
     {
       name:
         business.name,
-
       url:
         businessUrl,
     },
   ]
-
   const breadcrumbSchema = {
     '@context':
       'https://schema.org',
-
     '@type':
       'BreadcrumbList',
-
     itemListElement:
       breadcrumbItems.map(
         (
@@ -697,19 +622,15 @@ export default async function ListingPage({
         ) => ({
           '@type':
             'ListItem',
-
           position:
             index + 1,
-
           name:
             item.name,
-
           item:
             item.url,
         })
       ),
   }
-
   return (
     <>
       {/* STRUCTURED DATA */}
@@ -733,24 +654,17 @@ export default async function ListingPage({
             ),
         }}
       />
-
       <div className="min-h-screen bg-gray-50">
-
         {/* ================================================== */}
         {/* HEADER */}
         {/* ================================================== */}
-
         <section className="bg-white border-b">
-
           <div className="container mx-auto px-4 py-8">
-
             {/* BREADCRUMBS */}
-
             <nav
               aria-label="Breadcrumb"
               className="flex flex-wrap items-center gap-2 text-sm text-gray-500 mb-7"
             >
-
               <Link
                 href="/"
                 className="hover:text-green-600"
@@ -761,20 +675,17 @@ export default async function ListingPage({
               <span>
                 ›
               </span>
-
               <Link
                 href="/near-me"
                 className="hover:text-green-600"
               >
                 Near Me
               </Link>
-
               {business.country_slug && (
                 <>
                   <span>
                     ›
                   </span>
-
                   <Link
                     href={`/near-me/${business.country_slug}`}
                     className="hover:text-green-600"
@@ -785,13 +696,11 @@ export default async function ListingPage({
                   </Link>
                 </>
               )}
-
               {business.state_slug && (
                 <>
                   <span>
                     ›
                   </span>
-
                   <Link
                     href={`/near-me/${business.country_slug}/${business.state_slug}`}
                     className="hover:text-green-600"
@@ -802,7 +711,6 @@ export default async function ListingPage({
                   </Link>
                 </>
               )}
-
               {cityPath && (
                 <>
                   <span>
@@ -821,173 +729,121 @@ export default async function ListingPage({
                   </Link>
                 </>
               )}
-
               <span>
                 ›
               </span>
-
               <span className="text-gray-800">
                 {
                   business.name
                 }
               </span>
-
             </nav>
-
             <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
-
               <div className="flex gap-4">
-
                 <div className="w-16 h-16 rounded-xl bg-green-100 text-green-700 flex items-center justify-center font-bold text-2xl shrink-0">
-
                   {business.name
                     .charAt(0)
                     .toUpperCase()}
-
                 </div>
-
                 <div>
-
                   <div className="flex flex-wrap items-center gap-2 mb-2">
-
                     <span className="text-sm bg-green-50 text-green-700 px-3 py-1 rounded-full">
                       {
                         serviceLabel
                       }
                     </span>
-
                     {business.is_claimed && (
                       <span className="inline-flex items-center gap-1 text-sm bg-blue-50 text-blue-700 px-3 py-1 rounded-full">
-
                         <ShieldCheck
                           size={15}
                         />
-
                         Claimed
-
                       </span>
                     )}
-
                     {business.featured_until &&
                       new Date(
                         business.featured_until
                       ) >
                         new Date() && (
-
                         <span className="text-sm bg-amber-100 text-amber-800 px-3 py-1 rounded-full">
                           ★ Featured
                         </span>
-
                       )}
-
                   </div>
-
                   <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
                     {
                       business.name
                     }
                   </h1>
-
                   {business.city && (
                     <div className="flex items-center gap-2 text-gray-600 mt-3">
-
                       <MapPin
                         size={18}
                       />
-
                       <span>
                         {
                           business.city
                         }
-
                         {business.state &&
                           `, ${business.state}`}
                       </span>
-
                     </div>
                   )}
-
                   {rating !== null && (
                     <div className="flex flex-wrap items-center gap-2 mt-3">
-
                       <Star
                         size={20}
                         className="text-yellow-500 fill-current"
                       />
-
                       <strong>
                         {rating.toFixed(
                           1
                         )}
                       </strong>
-
                       <span className="text-gray-500">
                         Google rating
                       </span>
-
                       {reviewCount !==
                         null &&
                         reviewCount >
                           0 && (
-
                           <span className="text-gray-500">
                             (
                             {reviewCount.toLocaleString()}{' '}
                             Google reviews)
                           </span>
-
                         )}
-
                     </div>
                   )}
-
                 </div>
-
               </div>
-
               {/* CLAIM / EDIT */}
-
               <div>
-
                 {isOwnerOrSubmitter ? (
-
                   hasPendingEdit ? (
-
                     <span className="inline-block text-sm bg-yellow-100 text-yellow-800 px-4 py-2 rounded-lg">
                       Edit pending review
                     </span>
-
                   ) : (
-
                     <Link
                       href={`/my-listings/${business.id}/edit`}
                       className="inline-block bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 transition"
                     >
                       Edit Listing
                     </Link>
-
                   )
-
                 ) : business.is_claimed ? (
-
                   <span className="inline-flex items-center gap-2 bg-gray-100 text-gray-600 px-4 py-3 rounded-lg">
-
                     <CheckCircle
                       size={17}
                     />
-
                     Claimed Listing
-
                   </span>
-
                 ) : hasPendingClaim ? (
-
                   <span className="inline-block bg-yellow-100 text-yellow-800 px-4 py-3 rounded-lg">
                     Claim pending review
                   </span>
-
                 ) : (
-
                   <TrackedLink
                     href={`/claim/${business.id}`}
                     event="claim"
@@ -998,44 +854,28 @@ export default async function ListingPage({
                   >
                     Claim This Business
                   </TrackedLink>
-
                 )}
-
               </div>
-
             </div>
-
           </div>
-
         </section>
-
         {/* ================================================== */}
         {/* CONTENT */}
         {/* ================================================== */}
-
         <div className="container mx-auto px-4 py-10">
-
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
             {/* ================================================== */}
             {/* MAIN COLUMN */}
             {/* ================================================== */}
-
             <main className="lg:col-span-2 space-y-7">
-
               {/* CONTACT */}
-
               <section className="bg-white border rounded-xl p-6">
-
                 <h2 className="text-xl font-bold mb-5">
                   Contact{' '}
                   {business.name}
                 </h2>
-
                 <div className="grid sm:grid-cols-2 gap-3">
-
                   {business.phone && (
-
                     <TrackedLink
                       href={`tel:${business.phone}`}
                       event="phone"
@@ -1044,22 +884,16 @@ export default async function ListingPage({
                       }
                       className="flex items-center justify-center gap-2 bg-green-600 text-white px-5 py-3 rounded-lg font-semibold hover:bg-green-700 transition"
                     >
-
                       <Phone
                         size={19}
                       />
-
                       Call{' '}
                       {
                         business.phone
                       }
-
                     </TrackedLink>
-
                   )}
-
                   {business.website && (
-
                     <TrackedLink
                       href={
                         business.website
@@ -1072,118 +906,77 @@ export default async function ListingPage({
                       }
                       className="flex items-center justify-center gap-2 border border-gray-300 px-5 py-3 rounded-lg font-semibold hover:bg-gray-50 transition"
                     >
-
                       <Globe
                         size={19}
                       />
-
                       Visit Website
-
                       <ExternalLink
                         size={15}
                       />
-
                     </TrackedLink>
-
                   )}
-
                 </div>
-
                 {business.address && (
-
                   <div className="flex items-start gap-3 mt-6 pt-5 border-t text-gray-700">
-
                     <MapPin
                       size={19}
                       className="mt-1 shrink-0 text-gray-500"
                     />
-
                     <div>
-
                       <div>
                         {
                           business.address
                         }
                       </div>
-
                       <div className="text-gray-500">
-
                         {
                           business.city
                         }
-
                         {business.state &&
                           `, ${business.state}`}
-
                         {business.country &&
                           `, ${business.country}`}
-
                       </div>
-
                     </div>
-
                   </div>
-
                 )}
-
               </section>
-
               {/* ABOUT */}
-
               <section className="bg-white border rounded-xl p-6">
-
                 <h2 className="text-2xl font-bold mb-4">
-                  About{' '}
-                  {
+                  About{' '}                  {
                     business.name
                   }
                 </h2>
-
                 {business.description ? (
-
-                  <p className="text-gray-700 leading-7">
-                    {
+                  <p className="text-gray-700 leading-7">                    {
                       business.description
                     }
                   </p>
-
                 ) : (
-
                   <p className="text-gray-700 leading-7">
-
                     {business.name}{' '}
                     provides{' '}
-
                     {serviceLabel.toLowerCase()}{' '}
-
                     services in{' '}
-
                     {
                       business.city
                     }
-
                     {business.state &&
                       `, ${business.state}`}.
-
                     Contact the business directly
                     for current services, pricing
                     and availability.
-
                   </p>
-
                 )}
-
                 {servicePath && (
-
                   <div className="mt-5">
-
                     <Link
                       href={
                         servicePath
                       }
                       className="inline-flex items-center gap-2 text-green-700 font-medium hover:underline"
                     >
-
                       View more{' '}
                       {
                         serviceLabel
@@ -1192,47 +985,30 @@ export default async function ListingPage({
                       {
                         business.city
                       }
-
                       <ArrowRight
                         size={16}
                       />
-
                     </Link>
-
                   </div>
-
                 )}
-
               </section>
-
               {/* HOURS */}
-
               <section className="bg-white border rounded-xl p-6">
-
                 <div className="flex items-center gap-2 mb-5">
-
                   <Clock className="text-green-600" />
-
                   <h2 className="text-2xl font-bold">
                     Business Hours
                   </h2>
-
                 </div>
-
                 {hasAnyHours ? (
-
                   <div className="divide-y">
-
                     {DAY_ORDER.map(
                       (day) => {
-
                         const hours =
                           openHours![day]
-
                         const isOpen =
                           hours?.open &&
                           hours?.close
-
                         return (
                           <div
                             key={
@@ -1240,15 +1016,12 @@ export default async function ListingPage({
                             }
                             className="flex justify-between gap-4 py-3"
                           >
-
                             <span className="capitalize font-medium text-gray-700">
                               {
                                 day
                               }
                             </span>
-
                             <span className="text-gray-600">
-
                               {isOpen
                                 ? `${to12h(
                                     hours.open!
@@ -1256,156 +1029,102 @@ export default async function ListingPage({
                                     hours.close!
                                   )}`
                                 : 'Closed'}
-
                             </span>
-
                           </div>
                         )
                       }
                     )}
-
                     <p className="text-sm text-gray-500 pt-4">
-
                       Business hours may change.
                       Contact the business to
                       confirm before visiting.
-
                     </p>
-
                   </div>
-
                 ) : (
-
                   <p className="text-gray-500">
-
                     Business hours have not been
                     listed. Contact the business
                     directly to confirm
                     availability.
-
                   </p>
-
                 )}
-
               </section>
-
               {/* BUSINESS INFORMATION */}
-
               <section className="bg-white border rounded-xl p-6">
-
                 <h2 className="text-2xl font-bold mb-5">
                   Business Information
                 </h2>
-
                 <dl className="divide-y">
-
                   <div className="flex justify-between gap-6 py-3">
-
                     <dt className="text-gray-500">
                       Service
                     </dt>
-
                     <dd className="font-medium text-right">
                       {
                         serviceLabel
                       }
                     </dd>
-
                   </div>
-
                   {business.city && (
-
                     <div className="flex justify-between gap-6 py-3">
-
                       <dt className="text-gray-500">
                         Location
                       </dt>
-
                       <dd className="font-medium text-right">
-
                         {
                           business.city
                         }
-
                         {business.state &&
                           `, ${business.state}`}
-
                       </dd>
-
                     </div>
-
                   )}
-
                   <div className="flex justify-between gap-6 py-3">
-
                     <dt className="text-gray-500">
                       Listing status
                     </dt>
-
                     <dd className="font-medium text-right">
-
                       {business.is_claimed
                         ? 'Claimed'
                         : 'Unclaimed'}
-
                     </dd>
-
                   </div>
-
                   {rating !== null && (
-
                     <div className="flex justify-between gap-6 py-3">
-
                       <dt className="text-gray-500">
                         Google rating
                       </dt>
-
                       <dd className="font-medium text-right">
                         {rating.toFixed(
                           1
                         )}{' '}
                         / 5
                       </dd>
-
                     </div>
-
                   )}
-
                 </dl>
-
               </section>
-
               {/* MORE SERVICES */}
-
               {cityPath && (
-
                 <section className="bg-green-50 border border-green-100 rounded-xl p-6">
-
                   <h2 className="text-xl font-bold text-gray-900">
-
                     Looking for more services in{' '}
                     {
                       business.city
                     }
                     ?
-
                   </h2>
-
                   <p className="text-gray-600 mt-2 mb-4">
-
                     Compare other lawn care,
                     landscaping and mower
                     businesses serving the area.
-
                   </p>
-
                   <Link
                     href={
                       cityPath
                     }
                     className="inline-flex items-center gap-2 text-green-700 font-semibold"
                   >
-
                     Browse{' '}
                     {
                       business.city
@@ -1414,13 +1133,40 @@ export default async function ListingPage({
                     <ArrowRight
                       size={17}
                     />
-
                   </Link>
-
                 </section>
 
               )}
-
+              <section className="bg-green-50 border border-green-100 rounded-xl p-6">
+                <h2 className="text-xl font-bold text-gray-900">
+                  Compare Businesses
+                </h2>
+                <CompareButton
+                    listing={{
+                      id: business.id,
+                      name: business.name,
+                      slug: business.slug,
+                      city: business.city,
+                      state: business.state,
+                      country: business.country,
+                      address: business.address,
+                      rating: business.rating,
+                      google_reviews_count: business.google_reviews_count == null
+                        ? business.google_reviews_count
+                        : Number(business.google_reviews_count),
+                      phone: business.phone,
+                      website: business.website,
+                      primary_category: business.primary_category,
+                      listing_type: business.listing_type,
+                      //is_verified: business.is_verified,
+                      is_claimed: business.is_claimed,
+                      //is_open_now: business.is_open_now,
+                      //distance_miles: business.distance_miles,
+                      open_hours: business.open_hours,
+                      //tags: business.tags,
+                    }}
+                  />
+              </section>
               {/* REQUEST QUOTE */}
 
               <div
@@ -1516,7 +1262,6 @@ export default async function ListingPage({
                   />
                 </div>
               )}
-
               {/* SIMILAR BUSINESSES */}
 
               {similar &&
@@ -1527,16 +1272,13 @@ export default async function ListingPage({
                       Similar Businesses
                     </h2>
                     <p className="text-sm text-gray-500 mb-5">
-
                       More{' '}
                       {serviceLabel.toLowerCase()}{' '}
                       providers in{' '}
                       {
                         business.city
                       }.
-
                     </p>
-
                     <div className="divide-y">
 
                       {similar.map(
@@ -1551,85 +1293,58 @@ export default async function ListingPage({
                             href={`/listings/${biz.slug}`}
                             className="block py-4 first:pt-0 last:pb-0 group"
                           >
-
                             <div className="font-semibold text-gray-900 group-hover:text-green-600">
                               {
                                 biz.name
                               }
                             </div>
-
                             <div className="flex items-center justify-between gap-3 mt-2">
-
                               <div className="flex items-center gap-1 text-sm text-gray-500">
-
                                 <MapPin
                                   size={13}
                                 />
-
                                 {
                                   biz.city
                                 }
-
                               </div>
-
                               {biz.rating &&
                                 Number(
                                   biz.rating
                                 ) >
                                   0 && (
-
                                   <div className="flex items-center gap-1 text-sm">
-
                                     <Star
                                       size={13}
                                       className="text-yellow-500 fill-current"
                                     />
-
                                     {Number(
                                       biz.rating
                                     ).toFixed(
                                       1
                                     )}
-
                                   </div>
-
                                 )}
-
                             </div>
-
                           </Link>
-
                         )
                       )}
-
                     </div>
-
                   </section>
-
                 )}
-
               {/* CLAIM CTA */}
-
               {!business.is_claimed &&
                 !isOwnerOrSubmitter &&
                 !hasPendingClaim && (
-
                   <section className="bg-blue-50 border border-blue-100 rounded-xl p-5">
-
                     <ShieldCheck className="text-blue-600 mb-3" />
-
                     <h2 className="font-bold text-lg">
                       Is this your business?
                     </h2>
-
                     <p className="text-sm text-gray-600 mt-2 mb-4">
-
                       Claim this listing to manage
                       your business information and
                       keep your profile accurate.
-
                     </p>
-
                     <TrackedLink
                       href={`/claim/${business.id}`}
                       event="claim"
@@ -1640,17 +1355,11 @@ export default async function ListingPage({
                     >
                       Claim This Business
                     </TrackedLink>
-
                   </section>
-
                 )}
-
             </aside>
-
           </div>
-
         </div>
-
       </div>
     </>
   )

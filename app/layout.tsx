@@ -6,12 +6,14 @@ import './globals.css'
 import Script from "next/script";
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' })
+import { CompareProvider } from '@/components/CompareProvider'
+import CompareTray from '@/components/CompareTray'
 
 
 export const metadata: Metadata = {
   title: 'Lawn Care & Mower Repair Near Me | Find Local Services',
-  description: 'Find lawn care, lawn mowing, and lawn mower repair services near you. Compare ratings, read reviews, and connect with local specialists.',
-  keywords: 'lawn care near me, lawn mower repair near me, lawn mowing service near me, lawn maintenance near me, lawnmower repair',
+  description: 'Find lawn care, lawn mowing, grass cutting services and lawn mower repair services near you. Compare ratings, read reviews, and connect with local specialists.',
+  keywords: 'lawn care near me, grass cutting near me, lawn mower repair near me, lawn mowing service near me, lawn maintenance near me, lawnmower repair',
   authors: [{ name: 'LawnMowerDir' }],
   openGraph: {
     title: 'Lawn Mowing Near Me',
@@ -93,6 +95,7 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>    
         <PromoRibbon /> 
+        <CompareProvider>
         
         {/* Global Navbar */}
         <Navbar />        
@@ -103,7 +106,10 @@ export default function RootLayout({
           </main>          
           {/* Global Footer */}
           <Footer />
+          
         </div>
+         <CompareTray />
+        </CompareProvider>
       </body>
     </html>
   )
