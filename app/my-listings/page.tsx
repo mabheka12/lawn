@@ -58,7 +58,7 @@ export default async function MyListingsPage() {
         created_at
       `)
       .or(
-        `owner_id.eq.${user.id},submitted_by_email.eq.${ownerEmail}`
+        `claimed_by.eq.${user.id},submitted_by_email.eq.${ownerEmail}`
       )
       .order('created_at', {
         ascending: false,

@@ -398,7 +398,7 @@ export default async function ListingPage({
     false
   if (user) {
     isOwnerOrSubmitter =
-      business.owner_id ===
+      business.claimed_by ===
         user.id ||
       (
         !!business.submitted_by_email &&
