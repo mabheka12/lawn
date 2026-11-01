@@ -76,11 +76,12 @@ async function safeSend(params: {
 
     console.log(
       '✅ Resend email accepted:',
-      {
+      {/*
         subject: params.subject,
         to: params.to,
         id: data?.id,
-      }
+      */}
+      
     )
 
     return data

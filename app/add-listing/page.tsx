@@ -7,7 +7,6 @@ import {
 } from 'react'
 
 import Link from 'next/link'
-
 import {
   Search,
   CheckCircle,
@@ -65,24 +64,18 @@ const MOWING_CATEGORIES = [
 export default function SubmitPage() {
   const [mode, setMode] =
     useState<'search' | 'form'>('search')
-
   const [query, setQuery] =
     useState('')
-
   const [searching, setSearching] =
     useState(false)
-
   const [suggestions, setSuggestions] =
     useState<Suggestion[]>([])
-
   const [isOpen, setIsOpen] =
     useState(false)
-
   const [
     highlightedIndex,
     setHighlightedIndex,
   ] = useState(-1)
-
   const debounceRef =
     useRef<ReturnType<typeof setTimeout> | null>(
       null
@@ -108,13 +101,10 @@ export default function SubmitPage() {
 
   const [loading, setLoading] =
     useState(false)
-
   const [success, setSuccess] =
     useState(false)
-
   const [errors, setErrors] =
     useState<string[]>([])
-
   const [
     duplicateInfo,
     setDuplicateInfo,
@@ -131,26 +121,21 @@ export default function SubmitPage() {
     if (debounceRef.current) {
       clearTimeout(debounceRef.current)
     }
-
     if (query.trim().length < 2) {
       setSuggestions([])
       setIsOpen(false)
       return
     }
-
     debounceRef.current =
       setTimeout(async () => {
         setSearching(true)
-
         try {
           const res = await fetch(
             `/api/listings/search?q=${encodeURIComponent(
               query.trim()
             )}`
           )
-
           const data = await res.json()
-
           const combined: Suggestion[] = [
             ...(data.businesses ?? []).map(
               (b: BusinessResult) => ({
@@ -158,7 +143,6 @@ export default function SubmitPage() {
                 data: b,
               })
             ),
-
             ...(data.pending ?? []).map(
               (p: PendingResult) => ({
                 kind: 'pending' as const,
@@ -166,7 +150,6 @@ export default function SubmitPage() {
               })
             ),
           ]
-
           setSuggestions(combined)
           setIsOpen(true)
           setHighlightedIndex(-1)
@@ -204,19 +187,16 @@ export default function SubmitPage() {
         setIsOpen(false)
       }
     }
-
     document.addEventListener(
       'mousedown',
       handleClickOutside
     )
-
     return () =>
       document.removeEventListener(
         'mousedown',
         handleClickOutside
       )
   }, [])
-
   // ---------------------------------------
   // KEYBOARD SEARCH
   // ---------------------------------------
@@ -230,20 +210,15 @@ export default function SubmitPage() {
     ) {
       return
     }
-
     if (e.key === 'ArrowDown') {
       e.preventDefault()
-
       setHighlightedIndex(
         (prev) =>
           (prev + 1) %
           suggestions.length
       )
-    }
-
-    if (e.key === 'ArrowUp') {
+    }    if (e.key === 'ArrowUp') {
       e.preventDefault()
-
       setHighlightedIndex(
         (prev) =>
           (prev -
@@ -252,21 +227,17 @@ export default function SubmitPage() {
           suggestions.length
       )
     }
-
     if (e.key === 'Escape') {
       setIsOpen(false)
       setHighlightedIndex(-1)
     }
-
     if (
       e.key === 'Enter' &&
       highlightedIndex >= 0
     ) {
       e.preventDefault()
-
       const selected =
         suggestions[highlightedIndex]
-
       if (
         selected.kind ===
           'business' &&
@@ -277,7 +248,6 @@ export default function SubmitPage() {
       }
     }
   }
-
   // ---------------------------------------
   // FORM HELPERS
   // ---------------------------------------
@@ -287,11 +257,9 @@ export default function SubmitPage() {
       ...current,
       name: query.trim(),
     }))
-
     setIsOpen(false)
     setMode('form')
   }
-
   function updateField(
     e:
       | React.ChangeEvent<HTMLInputElement>
@@ -308,7 +276,6 @@ export default function SubmitPage() {
         ...current,
         [name]: value,
       }
-
       // Repair listings always belong to Repairs.
       if (
         name === 'listing_type' &&
@@ -317,7 +284,6 @@ export default function SubmitPage() {
         updated.primary_category =
           'Repairs'
       }
-
       if (
         name === 'listing_type' &&
         value === 'mowing' &&
@@ -326,11 +292,9 @@ export default function SubmitPage() {
       ) {
         updated.primary_category = ''
       }
-
       return updated
     })
   }
-
   // ---------------------------------------
   // SUBMIT
   // ---------------------------------------
@@ -339,31 +303,24 @@ export default function SubmitPage() {
     e: React.FormEvent<HTMLFormElement>
   ) {
     e.preventDefault()
-
     setErrors([])
     setDuplicateInfo(null)
     setSuccess(false)
-
     const clientErrors =
       validateListing(form)
-
     if (clientErrors.length > 0) {
       setErrors(clientErrors)
       return
     }
-
     setLoading(true)
-
     const payload = {
       ...form,
-
       website: form.website
         ? normalizeWebsite(
             form.website
           )
         : '',
     }
-
     try {
       const res = await fetch(
         '/api/listings/submit',
@@ -374,7 +331,6 @@ export default function SubmitPage() {
             'Content-Type':
               'application/json',
           },
-
           body: JSON.stringify(
             payload
           ),
@@ -430,87 +386,64 @@ export default function SubmitPage() {
     } finally {
       setLoading(false)
     }
+    
   }
-
   // =======================================
   // SEARCH STEP
   // =======================================
-
   if (mode === 'search') {
     return (
       <div className="min-h-screen bg-gray-50">
-
         {/* HERO */}
-
         <section className="bg-gradient-to-r from-green-600 to-green-800 text-white py-14">
-
           <div className="container mx-auto px-4 text-center">
-
             <Building2
               size={46}
               className="mx-auto mb-4"
             />
-
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
               Add a Business
             </h1>
-
             <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto">
               Suggest a lawn, garden,
               landscaping or lawn mower
               business for inclusion in the
               directory.
             </p>
-
           </div>
-
         </section>
-
         <main className="container mx-auto px-4 py-12">
-
           <div className="max-w-3xl mx-auto">
-
             <div className="bg-white border rounded-2xl shadow-sm p-6 md:p-8">
-
               <div className="mb-7">
-
                 <div className="text-sm font-semibold text-green-700 mb-2">
                   STEP 1 OF 2
                 </div>
-
                 <h2 className="text-2xl md:text-3xl font-bold">
                   Check for an existing listing
                 </h2>
-
                 <p className="text-gray-600 mt-2 leading-relaxed">
                   Search for the business first
                   to help avoid duplicate
                   listings.
                 </p>
-
               </div>
-
               {/* SEARCH */}
-
               <div
                 ref={containerRef}
                 className="relative"
               >
-
                 <label
                   htmlFor="business-search"
                   className="block font-semibold mb-2"
                 >
                   Business name
                 </label>
-
                 <div className="relative">
-
                   <Search
                     className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 z-10"
                     size={20}
                   />
-
                   <input
                     id="business-search"
                     type="text"
@@ -533,40 +466,28 @@ export default function SubmitPage() {
                     autoFocus
                     autoComplete="off"
                   />
-
                 </div>
-
                 {isOpen && (
-
                   <div className="absolute z-20 mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-xl max-h-96 overflow-y-auto">
-
                     {searching && (
-
                       <div className="p-4 text-sm text-gray-500">
                         Searching...
                       </div>
-
                     )}
-
                     {!searching &&
                       suggestions.length ===
                         0 && (
-
                         <div className="p-4 text-sm text-gray-600">
                           No matching listing
                           found for "{query}".
                         </div>
-
                       )}
-
                     {!searching &&
                       suggestions.map(
                         (s, i) => {
-
                           const isHighlighted =
                             i ===
                             highlightedIndex
-
                           if (
                             s.kind ===
                             'business'
@@ -585,9 +506,7 @@ export default function SubmitPage() {
                                     : ''
                                 }`}
                               >
-
                                 <div className="min-w-0">
-
                                   <p className="font-semibold truncate">
                                     {
                                       s
@@ -595,7 +514,6 @@ export default function SubmitPage() {
                                         .name
                                     }
                                   </p>
-
                                   <p className="text-sm text-gray-500 truncate mt-1">
                                     {[
                                       s
@@ -612,39 +530,28 @@ export default function SubmitPage() {
                                         ', '
                                       )}
                                   </p>
-
                                 </div>
-
                                 {s.data
                                   .is_claimed ? (
-
                                   <span className="text-xs bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full flex items-center gap-1 shrink-0">
-
                                     <CheckCircle
                                       size={
                                         13
                                       }
                                     />
-
                                     Claimed
-
                                   </span>
-
                                 ) : (
-
                                   <Link
                                     href={`/claim/${s.data.id}`}
                                     className="text-sm bg-green-600 text-white px-4 py-2 rounded-lg shrink-0 hover:bg-green-700"
                                   >
                                     Claim
                                   </Link>
-
                                 )}
-
                               </div>
                             )
                           }
-
                           return (
                             <div
                               key={`pending-${s.data.id}`}
@@ -659,9 +566,7 @@ export default function SubmitPage() {
                                   : 'bg-yellow-50/50'
                               }`}
                             >
-
                               <div className="min-w-0">
-
                                 <p className="font-semibold truncate">
                                   {
                                     s
@@ -669,7 +574,6 @@ export default function SubmitPage() {
                                       .name
                                   }
                                 </p>
-
                                 <p className="text-sm text-gray-500 truncate mt-1">
                                   {[
                                     s
@@ -686,26 +590,18 @@ export default function SubmitPage() {
                                       ', '
                                     )}
                                 </p>
-
                               </div>
-
                               <span className="text-xs bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-full flex items-center gap-1 shrink-0">
-
                                 <Clock
                                   size={13}
                                 />
-
                                 Pending
-
                               </span>
-
                             </div>
                           )
                         }
                       )}
-
                     {!searching && (
-
                       <button
                         type="button"
                         onClick={
@@ -718,15 +614,10 @@ export default function SubmitPage() {
                           ? `None of these — suggest "${query}" as a new business`
                           : `Continue with "${query}"`}
                       </button>
-
                     )}
-
                   </div>
-
                 )}
-
               </div>
-
               <button
                 type="button"
                 onClick={proceedToForm}
@@ -737,19 +628,15 @@ export default function SubmitPage() {
                 className="w-full mt-5 bg-green-600 text-white p-3.5 rounded-xl font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-green-700 transition flex items-center justify-center gap-2"
               >
                 Continue
-
                 <ArrowRight
                   size={18}
                 />
               </button>
-
               <div className="flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-xl p-4 mt-6">
-
                 <Info
                   size={18}
                   className="text-blue-600 mt-0.5 shrink-0"
                 />
-
                 <p className="text-sm text-gray-600 leading-relaxed">
                   If you find an existing
                   unclaimed listing for your
@@ -757,47 +644,31 @@ export default function SubmitPage() {
                   instead of creating another
                   listing.
                 </p>
-
               </div>
-
             </div>
-
           </div>
-
         </main>
-
       </div>
     )
   }
-
   // =======================================
   // FORM STEP
   // =======================================
-
   return (
     <div className="min-h-screen bg-gray-50">
-
       <section className="bg-gradient-to-r from-green-600 to-green-800 text-white py-12">
-
         <div className="container mx-auto px-4 text-center">
-
           <h1 className="text-4xl font-bold mb-3">
             Submit a Business Listing
           </h1>
-
           <p className="text-white/90 max-w-2xl mx-auto">
             Provide the available business
             information below.
           </p>
-
         </div>
-
       </section>
-
       <main className="container mx-auto px-4 py-12">
-
         <div className="max-w-3xl mx-auto">
-
           <button
             type="button"
             onClick={() =>
@@ -807,72 +678,48 @@ export default function SubmitPage() {
           >
             ← Back to business search
           </button>
-
           <div className="bg-white border rounded-2xl shadow-sm p-6 md:p-8">
-
             <div className="mb-7">
-
               <div className="text-sm font-semibold text-green-700 mb-2">
                 STEP 2 OF 2
               </div>
-
               <h2 className="text-2xl md:text-3xl font-bold">
                 Business Information
               </h2>
-
               <p className="text-gray-600 mt-2">
                 Enter information that can help
                 visitors identify and contact the
                 business.
               </p>
-
             </div>
-
             {/* SUCCESS */}
-
             {success && (
-
               <div className="mb-6 p-5 bg-green-50 border border-green-200 text-green-800 rounded-xl">
-
                 <div className="flex items-start gap-3">
-
                   <CheckCircle
                     size={22}
                     className="mt-0.5 shrink-0"
                   />
-
                   <div>
-
                     <p className="font-semibold">
                       Business submitted
                     </p>
-
                     <p className="text-sm mt-1">
                       The submission has been
                       received and is awaiting
                       review.
                     </p>
-
                   </div>
-
                 </div>
-
               </div>
-
             )}
-
             {/* ERRORS */}
-
             {errors.length > 0 && (
-
               <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">
-
                 <p className="font-semibold mb-2">
                   Please check the following:
                 </p>
-
                 <ul className="list-disc pl-5 space-y-1">
-
                   {errors.map(
                     (err, i) => (
                       <li key={i}>
@@ -880,27 +727,18 @@ export default function SubmitPage() {
                       </li>
                     )
                   )}
-
                 </ul>
-
               </div>
-
             )}
-
             {/* DUPLICATE */}
-
             {duplicateInfo && (
-
               <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-xl text-sm">
-
                 <p>
                   {
                     duplicateInfo.message
                   }
                 </p>
-
                 {duplicateInfo.claimUrl && (
-
                   <Link
                     href={
                       duplicateInfo.claimUrl
@@ -909,22 +747,15 @@ export default function SubmitPage() {
                   >
                     View the claim option →
                   </Link>
-
                 )}
-
               </div>
-
             )}
-
             <form
               onSubmit={submit}
               className="space-y-7"
             >
-
               {/* BASIC INFORMATION */}
-
-              <fieldset>
-
+              <fieldset>                
                 <legend className="text-lg font-bold mb-4 flex items-center gap-2">
                   <Building2
                     size={20}
@@ -932,18 +763,14 @@ export default function SubmitPage() {
                   />
                   Business Details
                 </legend>
-
                 <div className="space-y-4">
-
                   <div>
-
                     <label
                       htmlFor="name"
                       className="block text-sm font-medium mb-1.5"
                     >
                       Business Name *
                     </label>
-
                     <input
                       id="name"
                       name="name"
@@ -956,18 +783,14 @@ export default function SubmitPage() {
                       }
                       required
                     />
-
                   </div>
-
                   <div>
-
                     <label
                       htmlFor="description"
                       className="block text-sm font-medium mb-1.5"
                     >
-                      Description
+                      Description *
                     </label>
-
                     <textarea
                       id="description"
                       name="description"
@@ -980,33 +803,24 @@ export default function SubmitPage() {
                       value={
                         form.description
                       }
+                      required
                     />
-
                   </div>
-
                 </div>
-
               </fieldset>
-
               {/* SERVICE */}
-
               <fieldset className="border-t pt-7">
-
                 <legend className="text-lg font-bold mb-4">
                   Service
                 </legend>
-
                 <div className="grid sm:grid-cols-2 gap-4">
-
                   <div>
-
                     <label
                       htmlFor="listing_type"
                       className="block text-sm font-medium mb-1.5"
                     >
                       Business Type *
                     </label>
-
                     <select
                       id="listing_type"
                       name="listing_type"
@@ -1021,26 +835,20 @@ export default function SubmitPage() {
                       <option value="mowing">
                         Lawn & Garden Services
                       </option>
-
                       <option value="repairs">
                         Lawn Mower Repair
                       </option>
                     </select>
-
                   </div>
-
                   <div>
-
                     <label
                       htmlFor="primary_category"
                       className="block text-sm font-medium mb-1.5"
                     >
                       Primary Category *
                     </label>
-
                     {form.listing_type ===
                     'repairs' ? (
-
                       <input
                         id="primary_category"
                         name="primary_category"
@@ -1048,9 +856,7 @@ export default function SubmitPage() {
                         readOnly
                         className="w-full p-3 border rounded-lg bg-gray-50 text-gray-600"
                       />
-
                     ) : (
-
                       <select
                         id="primary_category"
                         name="primary_category"
@@ -1063,11 +869,9 @@ export default function SubmitPage() {
                         required
                         className="w-full p-3 border rounded-lg bg-white focus:ring-2 focus:ring-green-500 outline-none"
                       >
-
                         <option value="">
                           Select a category
                         </option>
-
                         {MOWING_CATEGORIES.map(
                           (
                             category
@@ -1086,21 +890,13 @@ export default function SubmitPage() {
                             </option>
                           )
                         )}
-
                       </select>
-
                     )}
-
                   </div>
-
                 </div>
-
               </fieldset>
-
               {/* LOCATION */}
-
               <fieldset className="border-t pt-7">
-
                 <legend className="text-lg font-bold mb-4 flex items-center gap-2">
                   <MapPin
                     size={20}
@@ -1108,18 +904,14 @@ export default function SubmitPage() {
                   />
                   Location
                 </legend>
-
                 <div className="space-y-4">
-
                   <div>
-
                     <label
                       htmlFor="address"
                       className="block text-sm font-medium mb-1.5"
                     >
                       Address
                     </label>
-
                     <input
                       id="address"
                       name="address"
@@ -1132,20 +924,15 @@ export default function SubmitPage() {
                         form.address
                       }
                     />
-
                   </div>
-
                   <div className="grid sm:grid-cols-3 gap-4">
-
                     <div>
-
                       <label
                         htmlFor="city"
                         className="block text-sm font-medium mb-1.5"
                       >
                         City *
                       </label>
-
                       <input
                         id="city"
                         name="city"
@@ -1158,18 +945,14 @@ export default function SubmitPage() {
                         }
                         required
                       />
-
                     </div>
-
                     <div>
-
                       <label
                         htmlFor="state"
                         className="block text-sm font-medium mb-1.5"
                       >
                         State / Region
                       </label>
-
                       <input
                         id="state"
                         name="state"
@@ -1181,18 +964,14 @@ export default function SubmitPage() {
                           form.state
                         }
                       />
-
                     </div>
-
                     <div>
-
                       <label
                         htmlFor="country"
                         className="block text-sm font-medium mb-1.5"
                       >
                         Country *
                       </label>
-
                       <select
                         id="country"
                         name="country"
@@ -1208,37 +987,24 @@ export default function SubmitPage() {
                         <option value="">
                           Select
                         </option>
-
                         <option value="Australia">
                           Australia
                         </option>
-
                         <option value="United States">
                           United States
                         </option>
-
                       </select>
-
                     </div>
-
                   </div>
-
                 </div>
-
               </fieldset>
-
               {/* CONTACT */}
-
               <fieldset className="border-t pt-7">
-
                 <legend className="text-lg font-bold mb-4">
                   Contact Information
                 </legend>
-
                 <div className="grid sm:grid-cols-2 gap-4">
-
                   <div>
-
                     <label
                       htmlFor="phone"
                       className="block text-sm font-medium mb-1.5 flex items-center gap-1"
@@ -1246,7 +1012,6 @@ export default function SubmitPage() {
                       <Phone size={14} />
                       Phone
                     </label>
-
                     <input
                       id="phone"
                       name="phone"
@@ -1259,11 +1024,8 @@ export default function SubmitPage() {
                         form.phone
                       }
                     />
-
                   </div>
-
                   <div>
-
                     <label
                       htmlFor="website"
                       className="block text-sm font-medium mb-1.5 flex items-center gap-1"
@@ -1271,7 +1033,6 @@ export default function SubmitPage() {
                       <Globe size={14} />
                       Website
                     </label>
-
                     <input
                       id="website"
                       name="website"
@@ -1285,22 +1046,15 @@ export default function SubmitPage() {
                         form.website
                       }
                     />
-
                   </div>
-
                 </div>
-
               </fieldset>
-
               {/* INFORMATION NOTICE */}
-
               <div className="flex items-start gap-3 bg-gray-50 border rounded-xl p-4">
-
                 <FileText
                   size={18}
                   className="text-gray-500 mt-0.5 shrink-0"
                 />
-
                 <p className="text-sm text-gray-600 leading-relaxed">
                   Please submit information you
                   believe to be accurate. Submitted
@@ -1308,9 +1062,7 @@ export default function SubmitPage() {
                   appearing publicly in the
                   directory.
                 </p>
-
               </div>
-
               <button
                 type="submit"
                 disabled={loading}
@@ -1320,15 +1072,10 @@ export default function SubmitPage() {
                   ? 'Submitting...'
                   : 'Submit Business'}
               </button>
-
             </form>
-
           </div>
-
         </div>
-
       </main>
-
     </div>
   )
 }
