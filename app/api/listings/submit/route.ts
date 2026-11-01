@@ -31,7 +31,7 @@ const ALLOWED_COUNTRIES = [
 
 function cleanString(
   value: unknown,
-  maxLength = 2000
+  maxLength = 70000
 ): string {
   if (typeof value !== 'string') return ''
 
@@ -82,13 +82,32 @@ export async function POST(request: Request) {
       city: cleanString(input.city, 150),
       state: cleanString(input.state, 150),
       country: cleanString(input.country, 100),
-      description: cleanString(input.description, 3000),
+      description: cleanString(input.description, 25000),
       listing_type: listingType,
       primary_category: cleanString(
         input.primary_category,
         100
       ),
     }
+
+    // Enforce minimum description length after sanitization.
+const wordCount = form.description
+  .trim()
+  .split(/\s+/)
+  .filter(Boolean)
+  .length
+
+if (wordCount < 500) {
+  return NextResponse.json(
+    {
+      error: 'Business description must contain at least 500 words.',
+      errors: [
+        `Description requires at least 500 words. Received ${wordCount}.`,
+      ],
+    },
+    { status: 400 }
+  )
+}
 
     // 3. Validate required fields using your existing helper.
     const errors = validateListing(form)

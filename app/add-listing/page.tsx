@@ -61,6 +61,13 @@ const MOWING_CATEGORIES = [
   'Gardener',
 ]
 
+const MIN_DESCRIPTION_WORDS = 500
+
+function countWords(text: string): number {
+  return text.trim()
+    ? text.trim().split(/\s+/).length
+    : 0
+}
 export default function SubmitPage() {
   const [mode, setMode] =
     useState<'search' | 'form'>('search')
@@ -306,6 +313,15 @@ export default function SubmitPage() {
     setErrors([])
     setDuplicateInfo(null)
     setSuccess(false)
+
+    const wordCount = countWords(form.description)
+
+        if (wordCount < MIN_DESCRIPTION_WORDS) {
+          setErrors([
+            `Business description must contain at least 500s words. Currently: ${wordCount} words.`,
+          ])
+          return
+        }
     const clientErrors =
       validateListing(form)
     if (clientErrors.length > 0) {
@@ -791,20 +807,48 @@ export default function SubmitPage() {
                     >
                       Description *
                     </label>
-                    <textarea
+                  <textarea
                       id="description"
                       name="description"
-                      rows={5}
-                      placeholder="Briefly describe the services offered by the business."
+                      rows={7}
+                      placeholder="Describe the business, services offered, areas served, experience, equipment, and other useful details..."
                       className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
-                      onChange={
-                        updateField
-                      }
-                      value={
-                        form.description
-                      }
+                      onChange={updateField}
+                      value={form.description}
                       required
                     />
+
+                    <div className="flex justify-between items-center mt-2 text-sm">
+                      <span className="text-gray-500">
+                        Minimum 200 words required.
+                      </span>
+
+                      <span
+                        className={
+                          countWords(form.description) >= 200
+                            ? 'text-green-600 font-semibold'
+                            : 'text-orange-600 font-medium'
+                        }
+                      >
+                        {countWords(form.description)} / 200 words
+                      </span>
+                    </div>
+
+                    <div className="w-full bg-gray-200 rounded-full h-1.5 mt-2">
+                      <div
+                        className={`h-1.5 rounded-full transition-all ${
+                          countWords(form.description) >= 200
+                            ? 'bg-green-600'
+                            : 'bg-orange-500'
+                        }`}
+                        style={{
+                          width: `${Math.min(
+                            (countWords(form.description) / 200) * 100,
+                            100
+                          )}%`,
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
               </fieldset>
