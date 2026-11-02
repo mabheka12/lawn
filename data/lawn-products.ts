@@ -91,7 +91,7 @@ export type LawnProduct = {
 export const lawnProducts: LawnProduct[] = [
   {
     id: 1,
-    slug: "example-cordless-lawn-mower",
+    slug: "cordless-lawn-mower",
     title: "Cordless Lawn Mower",
     category: "lawn-mowers",
     image: "https://m.media-amazon.com/images/I/71kjrWYu+VL._AC_UY218_.jpg",
@@ -116,7 +116,7 @@ export const lawnProducts: LawnProduct[] = [
 
   {
     id: 2,
-    slug: "example-grass-trimmer",
+    slug: "grass-trimmer",
     title: "Cordless Grass Trimmer",
     category: "grass-trimmers",
     image: "https://m.media-amazon.com/images/I/61RV-uzw97L._AC_UY218_.jpg",
@@ -141,7 +141,7 @@ export const lawnProducts: LawnProduct[] = [
 
   {
     id: 3,
-    slug: "example-leaf-blower",
+    slug: "leaf-blower",
     title: "Cordless Leaf Blower",
     category: "leaf-blowers",
     image: "https://m.media-amazon.com/images/I/71IAbWUq5qL._AC_UY218_.jpg",
@@ -165,7 +165,7 @@ export const lawnProducts: LawnProduct[] = [
   },
   {
     id: 4,
-    slug: "example-lawn-fertilizer",
+    slug: "lawn-fertilizer",
     title: "Lawn Fertilizer",
     category: "lawn-fertilizers",
     image: "https://m.media-amazon.com/images/I/81tVjfRVk6L._AC_UY218_.jpg",
@@ -189,7 +189,7 @@ export const lawnProducts: LawnProduct[] = [
   },
   {
     id: 5,
-    slug: "example-sprinkler-system",
+    slug: "sprinkler-system",
     title: "Sprinkler System",
     category: "sprinkler-systems",
     image: "https://m.media-amazon.com/images/I/61XJ9ZJQZSL._AC_UY218_.jpg",
@@ -213,7 +213,7 @@ export const lawnProducts: LawnProduct[] = [
   },
   {
     id: 6,
-      slug: "example-lawn-edger",
+      slug: "lawn-edger",
       title: "Lawn Edger",
       category: "lawn-edgers",
       image: "https://m.media-amazon.com/images/I/511Qi-88TmL._AC_UY218_.jpg",
@@ -237,7 +237,7 @@ export const lawnProducts: LawnProduct[] = [
   },
   {
     id: 7,
-    slug: "example-weed-control",
+    slug: "weed-control",
     title: "Weed Control",
     category: "weed-control",
     image: "https://m.media-amazon.com/images/I/81ERGLJpsdL._AC_UY218_.jpg",
@@ -261,7 +261,7 @@ export const lawnProducts: LawnProduct[] = [
   },
   {
     id: 8,
-    slug: "example-grass-seed",
+    slug: "grass-seed",
     title: "Grass Seed",
     category: "grass-seed",
     image: "https://m.media-amazon.com/images/I/511Qi-88TmL._AC_UY218_.jpg",
@@ -285,7 +285,7 @@ export const lawnProducts: LawnProduct[] = [
   },
   {
     id: 9,
-    slug: "example-lawn-tool-set",
+    slug: "lawn-tool-set",
     title: "Lawn Tool Set",
     category: "lawn-tools",
     image: "https://m.media-amazon.com/images/I/81J192gG8GL._AC_UL320_.jpg",
@@ -309,7 +309,7 @@ export const lawnProducts: LawnProduct[] = [
   },
   {
     id: 10,
-    slug: "example-irrigation-kit",
+    slug: "irrigation-kit",
     title: "Irrigation Kit",
     category: "sprinklers-irrigation",
     image: "https://m.media-amazon.com/images/I/81qS+0iTxTL._AC_UL320_.jpg",
