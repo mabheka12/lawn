@@ -82,7 +82,7 @@ export default function ContactPage() {
                   </p>
 
                   <Link
-                    href="/submit-business"
+                    href="/add-listing"
                     className="inline-flex items-center gap-2 text-green-700 font-semibold hover:underline"
                   >
                     Submit a Business
@@ -201,7 +201,7 @@ export default function ContactPage() {
                   </p>
 
                   <Link
-                    href="/submit-business"
+                    href="/add-listing"
                     className="inline-block text-green-700 text-sm font-medium mt-2 hover:underline"
                   >
                     Submit a business →

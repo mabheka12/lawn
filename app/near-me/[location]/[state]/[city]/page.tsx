@@ -1109,8 +1109,8 @@ export default async function CityPage({
               in your area.
             </p>
             <TrackedLink
-              href="/submit-business"
-              event="submit-business"
+              href="/add-listing"
+              event="add-listing"
               properties={{
                 city,
                 state,

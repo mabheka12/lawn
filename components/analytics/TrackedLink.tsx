@@ -26,7 +26,7 @@ interface TrackedLinkProps {
     | 'phone'
     | 'website'
     | 'claim'
-    | 'submit-business'
+    | 'add-listing'
 
   properties?: AnalyticsProperties
 }
@@ -70,7 +70,7 @@ export default function TrackedLink({
         )
         break
 
-      case 'submit-business':
+      case 'add-listing':
         trackSubmitBusinessClick(
           eventProperties
         )

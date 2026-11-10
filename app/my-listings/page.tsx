@@ -174,7 +174,7 @@ export default async function MyListingsPage() {
         </div>
 
         <Link
-          href="/submit-business"
+          href="/add-listing"
           className="inline-flex items-center justify-center gap-2 bg-green-600 text-white px-5 py-3 rounded-lg font-semibold hover:bg-green-700 transition"
         >
           <PlusCircle size={18} />
@@ -209,7 +209,7 @@ export default async function MyListingsPage() {
           </p>
 
           <Link
-            href="/submit-business"
+            href="/add-listing"
             className="inline-flex bg-green-600 text-white px-5 py-3 rounded-lg font-semibold hover:bg-green-700"
           >
             Submit a Business
